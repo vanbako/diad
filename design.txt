@@ -23,63 +23,67 @@ Asynchronous Resets using the Artix-7 flip-flops to bring it in the clock domain
 [11-8] OPC opcode
 [7-4]  BCC branch condition code (0 = RA, 1 = EQ, 2 = NE, 3 = LT, 4 = GT, 5 = LE, 6 = GE)
 [7-4]  TGT target general purpose register (16x GP)
-[7-4]  TGT target special register (0 = PC, 1 = LR, 2 = SSP)
+[7-4]  TGT target special register (0 = PC, 1 = LR, 2 = IR, 3 = SSP)
 [3-0]  SRC source general purpose register (16x GP)
-[3-0]  SRC source special register (0 = PC, 1 = LR, 2 = SSP)
+[3-0]  SRC source special register (0 = PC, 1 = LR, 2 = IR, 3 = SSP)
 [7]    higher or lower bits immediate value (0 = low, 1 = high)
 [5-0]  IMM immediate value (6 bit)
-[5-0]  OFF signed 8-bit offset
+[5-0]  OFF signed 4-bit offset
+[2-0]  Instruction set
 unused for the instruction:
 [x-y]    RSV reserved, must be all 0 (for the moment not checked, a check must be implemented when implementing interrupts where it should generate an illegal instruction interrupt if RSV bits are not 0)
 
 Both general purpose and special registers use the same bits in the instruction format
-Regular instructions use general purpose registers, special instructions (CPY, JMP, UPD) use special registers. This will be handled in the decode stage.
+Regular instructions use general purpose registers, special instructions (SRMOV, SRBCC) use special registers. This will be handled in the decode stage.
 
 Branch condition codes use some of the same bits as TGT, as TGT is not used in branching. This will be handled in the decode stage.
 
 i after the instruction means immediate value
 s after the instruction means signed operation
 
-NOP
-HLT
-LUI #imm
-MOV Rs, Rt
-MOVi #imm, Rt
-MOVis #imm, Rt
-ADD Rs, Rt
-ADDi #imm, Rt
-ADDs Rs, Rt
-ADDis #imm, Rt
-SUB Rs, Rt
-SUBi #imm, Rt
-SUBs Rs, Rt
-SUBis #imm, Rt
-NOT Rt
-AND Rs, Rt
-ANDi #imm, Rt
-OR Rs, Rt
-ORi #imm, Rt
-XOR Rs, Rt
-XORi #imm, Rt
-SL Rs, Rt
-SLi #imm, Rt
-SR Rs, Rt
-SRi #imm, Rt
-SRs Rs, Rt
-SRis #imm, Rt
-CMP Rs, Rt
-CMPi #imm, Rt
-CMPs Rs, Rt
-CMPis #imm, Rt
-BCC Rs
-BCCi #imm
-BCCis #imm
-LD offset(Rs), Rt
-LDi (imm), Rt
-ST Rs, offset(Rt)
-STi #imm, (Rt)
-SRMOV PC+off, LR
-SRBCC LR+off
+In the assembly language, first operand is source, second operand is target.
+
+NOP (no operation)
+HLT (halt)
+Li [high|low]#imm (load immediate)
+Lis #imm (load immediate sign-extend, only low)
+MOV Rs, Rt (move)
+MOVi Rt (move immediate)
+MOVis Rt (move immediate sign-extend)
+ADD Rs, Rt (add)
+ADDi Rt (add immediate)
+ADDs Rs, Rt	(add signed)
+ADDis Rt (add signed immediate)
+SUB Rs, Rt (subtract)
+SUBi Rt (subtract immediate)
+SUBs Rs, Rt	(subtract signed)
+SUBis Rt (subtract signed immediate)
+NOT Rt (bitwise not)
+AND Rs, Rt (bitwise and)
+ANDi Rt (bitwise and immediate)
+OR Rs, Rt (bitwise or)
+ORi Rt (bitwise or immediate)
+XOR Rs, Rt (bitwise xor)
+XORi Rt (bitwise xor immediate)
+SL Rs, Rt (shift left)
+SLi Rt (shift left immediate)
+SR Rs, Rt (shift right)
+SRi Rt (shift right immediate)
+SRs Rs, Rt (shift right signed)
+SRis Rt (shift right signed immediate)
+CMP Rs, Rt (compare)
+CMPi Rt (compare immediate)
+CMPs Rs, Rt (compare signed)
+CMPis Rt (compare signed immediate)
+BCC Rs (branch condition code) (branch if condition is met)
+BCCi (branch condition code immediate) (branch if condition is met)
+BCCis (branch condition code immediate signed) (branch if condition is met)
+LD (Rs), Rt (load from data memory)
+LDi Rt (load from data memory, immediate address)
+ST Rs, (Rt) (store to data memory)
+STi (Rt) (store immediate to data memory)
+SRMOV PC, LR (store pc in link register)
+SRBCC LR+offset (branch condition code to link register with offset) (branch if condition is met)
 
 That's too many instructions for 4 bits opcode, so there will be a need for a special instruction which switches between instruction sets
 
@@ -96,6 +100,7 @@ That's too many instructions for 4 bits opcode, so there will be a need for a sp
 - special registers
 PC  : program counter
 LR  : link register
+IR  : immediate register
 SSP : shadow stack pointer (not used yet)
 
 FL: flag register
@@ -124,32 +129,17 @@ henad
 	reglr
 	meminstr
 	memdata
-	controlunit
-		forwardunit
-		hazardunit
-		control1ia
-			stage1ia
-			latch1iaif
-		control1if
-			stage1if
-			latch1ifid
-		control2id
-			stage2id
-			latch2idex
-		control3ex
-			stage3ex
-			latch3exma
-		control4ma
-			stage4ma
-			latch4mamo
-		control4mo
-			stage4mo
-			latch4mora
-		control5ra
-			stage5ra
-			latch5raro
-		control5ro
-			stage5ro
+	hazardunit
+    stage1ia
+    stage1if
+    stage2id
+    stage3ex
+    stage4ma
+    stage4mo
+    stage5ra
+    stage5ro
 
+Hazards
 - Read After Write Hazards
 - Control Hazards
+- No forwarding, only stalling

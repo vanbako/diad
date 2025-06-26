@@ -1,0 +1,44 @@
+; 1. Version where one assembly instruction is one machine code instruction
+
+START:
+	SW	ISET_IS		; 0001 0000 0011  103
+	Lis	low#4		; 1111 0000 0100  f04
+	MOVis	R0		; 0010 0000 0000  200
+	Lis	low#0		; 1111 0000 0000  f00
+	MOVis	R1		; 0010 0001 0000  210
+LOOP:
+	SW	ISET_S		; 0001 0000 0100  104
+	SRMOV	PC, LR		; 0010 0001 0000  210
+	SW	ISET_IS		; 0001 0000 0011  103
+	Lis	low#SUB		; 1111 0000 1010  f0a
+	BRAis			; 1100 0000 0000  c00
+	SW	ISET_IS		; 0001 0000 0011  103
+	Lis	low#1		; 1111 0000 0001  f01
+	SUBis	R0		; 0100 0000 0000  400
+	Lis	low#0		; 1111 0000 0000  f00
+	CMPis	R0		; 1011 0000 0000  b00
+	Lis	low#LOOP	; 1111 0011 0101  f35
+	BGTis			; 1100 0100 0000  c40
+	SW	ISET_S		; 0001 0000 0100  104
+	HLT			; 1111 0000 0000  f00
+SUB:
+	Lis	low#1		; 1111 0000 0001  f01
+	ADDis	R1		; 0011 0001 0000  310
+	SW	ISET_S		; 0001 0000 0100  104
+	SRBRA	LR+1		; 1100 0001 0001  c11
+
+; 2. Shorter version
+
+START:
+	MOVis	low#4, R0
+	MOVis	low#0, R1
+LOOP:
+	SRMOV	PC, LR
+	BRAis	#SUB
+	SUBis	low#1, R0
+	CMPis	low#0, R0
+	BGTis	#LOOP
+	HLT
+SUB:
+	ADDis	low#1, R1
+	SRBRA	LR+1
