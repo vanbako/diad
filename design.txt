@@ -1,11 +1,11 @@
 - About
-I'm creating a henad (12 bit) 5-stage RISC microarchitecture core
+I'm creating a diad (24 bit) 5-stage RISC microarchitecture core
 The main goal is to keep the pipeline as simple as possible and to avoid stalls where possible
 Toolchain is Vivado Lab Edition 2024.2, language verilog
 
 - Details
 FPGA: Artix-7, Board: Basys 3
-instructions, all memories, (GP) general purpose registers, (SSP) shadow stack pointer, (LR) link register, (PC) program counter are henad (12 bit) in size
+instructions, all memories, (GP) general purpose registers, (SSP) shadow stack pointer, (LR) link register, (PC) program counter are diad (24 bit) in size
 floating points are not needed yet. They are for future extension
 no branch prediction, no out-of-order execution, no speculative execution, no interrupts, no exceptions, no cache, no TLB, no MMU
 no instruction set architecture yet, only microarchitecture
@@ -19,17 +19,14 @@ Single clock domain
 Asynchronous Resets using the Artix-7 flip-flops to bring it in the clock domain
 
 - Instruction format
-12 bit (henad) total, only those needed for the instruction are coded
-[11-8] OPC opcode
-[7-4]  BCC branch condition code (0 = RA, 1 = EQ, 2 = NE, 3 = LT, 4 = GT, 5 = LE, 6 = GE)
-[7-4]  TGT target general purpose register (16x GP)
-[7-4]  TGT target special register (0 = PC, 1 = LR, 2 = IR, 3 = SSP)
-[3-0]  SRC source general purpose register (16x GP)
-[3-0]  SRC source special register (0 = PC, 1 = LR, 2 = IR, 3 = SSP)
-[7]    higher or lower bits immediate value (0 = low, 1 = high)
-[5-0]  IMM immediate value (6 bit)
-[5-0]  OFF signed 4-bit offset
-[2-0]  Instruction set
+24 bit (diad) total, only those needed for the instruction are coded
+[23-16] OPC opcode
+[15-12] BCC branch condition code (0 = RA, 1 = EQ, 2 = NE, 3 = LT, 4 = GT, 5 = LE, 6 = GE)
+[15-12] TGT target general purpose register (16x GP)
+[15-12] TGT target special register (0 = PC, 1 = LR, 2 = IR, 3 = SSP)
+[11-8]  SRC source general purpose register (16x GP)
+[11-8]  SRC source special register (0 = PC, 1 = LR, 2 = IR, 3 = SSP)
+[11-0]  IMM immediate value (12 bit)
 unused for the instruction:
 [x-y]    RSV reserved, must be all 0 (for the moment not checked, a check must be implemented when implementing interrupts where it should generate an illegal instruction interrupt if RSV bits are not 0)
 
@@ -38,15 +35,15 @@ Regular instructions use general purpose registers, special instructions (SRMOV,
 
 Branch condition codes use some of the same bits as TGT, as TGT is not used in branching. This will be handled in the decode stage.
 
-i after the instruction means immediate value
+i after the instruction means immediate value (upper from IR and lower from IMM)
 s after the instruction means signed operation
+is after the instruction means signed immediate operation (only lower from IMM)
 
 In the assembly language, first operand is source, second operand is target.
 
 NOP (no operation)
 HLT (halt)
-Li [high|low]#imm (load immediate)
-Lis #imm (load immediate sign-extend, only low)
+LUI #imm (load upper immediate)
 MOV Rs, Rt (move)
 MOVi Rt (move immediate)
 MOVis Rt (move immediate sign-extend)
@@ -83,9 +80,7 @@ LDi Rt (load from data memory, immediate address)
 ST Rs, (Rt) (store to data memory)
 STi (Rt) (store immediate to data memory)
 SRMOV PC, LR (store pc in link register)
-SRBCC LR+offset (branch condition code to link register with offset) (branch if condition is met)
-
-That's too many instructions for 4 bits opcode, so there will be a need for a special instruction which switches between instruction sets
+SRBCC LR+#imm (branch condition code to link register with offset) (branch if condition is met)
 
 - Pipeline Stages
 1. IA/IF: Instruction Address & Fetch
@@ -115,10 +110,10 @@ FL: flag register
 - memories
 flash (Basys 3 Artix-7 FPGA trainer board)
 instruction:
-	4096 henads (12 bits) in size
+	4096 diads (24 bits) in size, 24 bit address space
 	read-only during pipeline operation (BRAM in Artix-7)
 data:
-	4096 henads (12 bits) in size
+	4096 diads (24 bits) in size, 24 bit address space
 	read-write (BRAM in Artix-7)
 
 - modules
