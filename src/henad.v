@@ -51,8 +51,8 @@ module henad(
     wire [11:0] final_instr;
 
 
-    reg  [3:0] ifid_set_reg;
-    wire [3:0] ifid_set;
+    // Current instruction set (constant as SW is unused)
+    wire [3:0] ifid_set = `ISET_R;
     // Instruction set value at each pipeline stage
     wire [3:0] idex_set;
     wire [3:0] exma_set;
@@ -245,22 +245,7 @@ module henad(
     );
 
 
-    // Instruction set tracking register.  The decode stage outputs the set
-    // for the current instruction and this register feeds the next
-    // instruction into the pipeline so that SW instructions take effect.
-    assign ifid_set = ifid_set_reg;
-
-    // Determine the instruction set for the next instruction.  A switch (SW)
-    // instruction selects a new set; otherwise the current set is preserved.
-    wire [3:0] next_ifid_set =
-        (ifid_instr[11:8] == `OPC_SW) ? {1'b0, ifid_instr[2:0]} : ifid_set_reg;
-
-    always @(posedge clk or posedge rst) begin
-        if (rst)
-            ifid_set_reg <= `ISET_R;
-        else if (stage2id_en)
-            ifid_set_reg <= next_ifid_set;
-    end
+    // Instruction set is fixed; no dynamic switching required.
 
     // ID stage
     stage2id u_stage2id(
