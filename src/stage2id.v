@@ -33,14 +33,13 @@ module stage2id(
     // Propagate enable to the next stage
     assign enable_out = enable_in;
 
-    // Decode stage: update instruction set when a SW instruction is seen
+    // Decode stage: use the current instruction set directly
     wire [3:0] opcode = instr_in[11:8];
-    wire [3:0] stage_set = (opcode == `OPC_SW) ? {1'b0, instr_in[2:0]}
-                                              : instr_set_in;
+    wire [3:0] stage_set = instr_set_in;
 
     // Replace handled instructions with NOPs
     wire [11:0] forwarded_instr =
-        (opcode == `OPC_NOP || opcode == `OPC_SW) ? 12'b0 : instr_in;
+        (opcode == `OPC_NOP) ? 12'b0 : instr_in;
 
     // Decode immediate, register and branch fields
     wire [3:0] bcc_w       = forwarded_instr[7:4];

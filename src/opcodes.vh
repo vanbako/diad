@@ -5,7 +5,6 @@
 
 // OPCODES independent of instruction set
 `define OPC_NOP      4'h0
-`define OPC_SW       4'h1
 
 // REGISTER SET
 `define OPC_R_MOV    4'h2
