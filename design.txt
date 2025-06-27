@@ -28,7 +28,7 @@ Asynchronous Resets using the Artix-7 flip-flops to bring it in the clock domain
 [11-8]  SRC source special register (0 = PC, 1 = LR, 2 = IR, 3 = SSP)
 [11-0]  IMM immediate value (12 bit)
 unused for the instruction:
-[x-y]    RSV reserved, must be all 0 (for the moment not checked, a check must be implemented when implementing interrupts where it should generate an illegal instruction interrupt if RSV bits are not 0)
+[x-y]   RSV reserved, must be all 0 (for the moment not checked, a check must be implemented when implementing interrupts where it should generate an illegal instruction interrupt if RSV bits are not 0)
 
 Both general purpose and special registers use the same bits in the instruction format
 Regular instructions use general purpose registers, special instructions (SRMOV, SRBCC) use special registers. This will be handled in the decode stage.
