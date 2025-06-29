@@ -96,9 +96,9 @@ module stage3ex(
             `OPC_RS_ADDs,
             `OPC_IS_ADDis: begin
                 calc       = tgt_op + operand;
-                alu_result = calc[11:0];
-                carry      = calc[12];
-                overflow   = (~(tgt_op[11] ^ operand[11]) & (alu_result[11] ^ tgt_op[11]));
+                alu_result = calc[23:0];
+                carry      = calc[24];
+                overflow   = (~(tgt_op[23] ^ operand[23]) & (alu_result[23] ^ tgt_op[23]));
             end
             `OPC_R_SUB,
             `OPC_I_SUBi,
@@ -108,10 +108,10 @@ module stage3ex(
             `OPC_I_CMPi,
             `OPC_RS_CMPs,
             `OPC_IS_CMPis: begin
-                calc       = tgt_op + (~operand + 12'd1);
-                alu_result = calc[11:0];
-                carry      = calc[12];
-                overflow   = ((tgt_op[11] ^ operand[11]) & (alu_result[11] ^ tgt_op[11]));
+                calc       = tgt_op + (~operand + 24'd1);
+                alu_result = calc[23:0];
+                carry      = calc[24];
+                overflow   = ((tgt_op[23] ^ operand[23]) & (alu_result[23] ^ tgt_op[23]));
             end
             `OPC_R_NOT: begin
                 alu_result = ~tgt_op;
@@ -221,53 +221,53 @@ module stage3ex(
                     alu_result = pc_in;
             end
             `OPC_S_HLT: begin
-                alu_result = 12'b0;
+                alu_result = 24'b0;
             end
             default: begin
-                alu_result = 12'b0;
+                alu_result = 24'b0;
             end
         endcase
 
-        alu_flags[`FLAG_Z] = (alu_result == 12'b0);
+        alu_flags[`FLAG_Z] = (alu_result == 24'b0);
         alu_flags[`FLAG_C] = carry;
-        alu_flags[`FLAG_N] = alu_result[11];
+        alu_flags[`FLAG_N] = alu_result[23];
         alu_flags[`FLAG_V] = overflow;
     end
 
     // Latch registers between EX and MA stages
-    reg [11:0] pc_latch;
-    reg [11:0] instr_latch;
+    reg [23:0] pc_latch;
+    reg [23:0] instr_latch;
     reg [3:0]  bcc_latch;
     reg [3:0]  tgt_gp_latch;
     reg [3:0]  tgt_sr_latch;
     reg [3:0]  src_gp_latch;
     reg [3:0]  src_sr_latch;
     reg        imm_en_latch;
-    reg [5:0]  imm_val_latch;
+    reg [11:0] imm_val_latch;
     reg        sgn_en_latch;
-    reg [11:0] result_latch;
+    reg [23:0] result_latch;
     reg [3:0]  flags_latch;
-    reg [11:0] store_data_latch;
+    reg [23:0] store_data_latch;
     reg        branch_taken_latch;
 
     always @(posedge clk or posedge rst) begin
         if (rst) begin
-            pc_latch       <= 12'b0;
-            instr_latch    <= 12'b0;
+            pc_latch       <= 24'b0;
+            instr_latch    <= 24'b0;
             bcc_latch      <= 4'b0;
             tgt_gp_latch   <= 4'b0;
             tgt_sr_latch   <= 4'b0;
             src_gp_latch   <= 4'b0;
             src_sr_latch   <= 4'b0;
             imm_en_latch   <= 1'b0;
-            imm_val_latch  <= 6'b0;
+            imm_val_latch  <= 12'b0;
             sgn_en_latch   <= 1'b0;
-            result_latch   <= 12'b0;
+            result_latch   <= 24'b0;
             flags_latch    <= 4'b0;
-            store_data_latch <= 12'b0;
+            store_data_latch <= 24'b0;
             branch_taken_latch <= 1'b0;
-            ir_reg <= 12'b0;
-            ir_comb <= 12'b0;
+            ir_reg <= 24'b0;
+            ir_comb <= 24'b0;
         end else if (enable_in) begin
             pc_latch       <= stage_pc;
             instr_latch    <= instr_in;
