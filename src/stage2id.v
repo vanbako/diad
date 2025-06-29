@@ -57,7 +57,6 @@ module stage2id(
     wire [3:0]  src_sr_w   = special_instr ? forwarded_instr[3:0] : 4'b0;
 // TODO: Check if this is correct
     wire [23:0] imm_val_w  = forwarded_instr[23:0];
-    wire        instr_lui  = (fwd_opcode == `OPC_I_LUI);
     // Signed operations and immediate based instructions
     wire signed_instr = (fwd_opcode == `OPC_RS_ADDs)  ||
                         (fwd_opcode == `OPC_RS_SUBs)  ||
@@ -93,8 +92,7 @@ module stage2id(
                       (fwd_opcode == `OPC_IS_Lis);
 
     wire        sgn_en_w   = signed_instr;
-    wire        imm_en_w   = imm_instr &&
-                             !(instr_lui);
+    wire        imm_en_w   = imm_instr;
 
     // Latch outputs for the next pipeline stage
     reg [23:0]  pc_latch;
