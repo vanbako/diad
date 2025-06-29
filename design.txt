@@ -80,7 +80,7 @@ LDi Rt (load from data memory, immediate address)
 ST Rs, (Rt) (store to data memory)
 STi (Rt) (store immediate to data memory)
 SRMOV PC, LR (store pc in link register)
-SRBCC LR+#imm (branch condition code to link register with offset) (branch if condition is met)
+SRBCC LR+#imm (branch condition code to link register with immediatee) (branch if condition is met)
 
 - Pipeline Stages
 1. IA/IF: Instruction Address & Fetch
