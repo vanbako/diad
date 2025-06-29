@@ -30,7 +30,7 @@ module stage5ro(
     // Decode opcode for write-back decisions
     wire [3:0] opcode = instr_in[11:8];
 
-    wire reg_write = reg_write_fn(instr_set_in, opcode);
+    wire reg_write = reg_write_fn(opcode);
 
     // Pass through the address computed in the RA stage
     assign reg_waddr  = reg_waddr_in;
@@ -38,7 +38,7 @@ module stage5ro(
     assign reg_we     = enable_in && reg_write;
 
     // Write to the link register for the SRMOV instruction
-    wire lr_write = ({instr_set_in, opcode} == {`ISET_S, `OPC_S_SRMOV});
+    wire lr_write = (opcode == `OPC_S_SRMOV);
     assign lr_wdata = result_in;
     assign lr_we    = enable_in && lr_write;
 

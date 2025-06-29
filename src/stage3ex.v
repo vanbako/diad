@@ -193,7 +193,8 @@ module stage3ex(
                 store_data = ir_reg; // Immediate data
             end
             `OPC_I_Li: begin
-                ir_comb = stage_imm_hilo ? {stage_imm_val, ir_reg[5:0]} : {ir_reg[11:6], stage_imm_val};
+                // Load immediate into the lower half of the IR
+                ir_comb = {ir_reg[11:6], stage_imm_val};
             end
             `OPC_IS_Lis: begin
                 ir_comb = {{6{stage_imm_val[5]}}, stage_imm_val};
@@ -216,7 +217,7 @@ module stage3ex(
                     default: branch_taken = 1'b0;
                 endcase
                 if (branch_taken)
-                    alu_result = lr_in + {{6{stage_off[5]}}, stage_off};
+                    alu_result = lr_in + {{6{stage_imm_val[5]}}, stage_imm_val[5:0]};
                 else
                     alu_result = pc_in;
             end
