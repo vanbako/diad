@@ -55,7 +55,7 @@ module stage3ex(
     wire [3:0]  stage_src_gp = src_gp_in;
     wire [3:0]  stage_src_sr = src_sr_in;
     wire        stage_imm_en   = imm_en_in;
-    wire [5:0]  stage_imm_val  = imm_val_in;
+    wire [11:0] stage_imm_val  = imm_val_in;
     wire        stage_sgn_en   = sgn_en_in;
 
     // Execution logic (formerly in a separate ALU module)
@@ -85,63 +85,63 @@ module stage3ex(
         // value across different sets can be uniquely identified.
         // This avoids executing a special set instruction as a register set
         // instruction when the opcode values overlap.
-        case ({instr_set_in, instr_in[11:8]})
-            {`ISET_R,  `OPC_R_MOV},
-            {`ISET_I,  `OPC_I_MOVi},
-            {`ISET_IS, `OPC_IS_MOVis}: begin
+        case (instr_in[23:16])
+            `OPC_R_MOV,
+            `OPC_I_MOVi,
+            `OPC_IS_MOVis: begin
                 alu_result = operand;
             end
-            {`ISET_R,  `OPC_R_ADD},
-            {`ISET_I,  `OPC_I_ADDi},
-            {`ISET_RS, `OPC_RS_ADDs},
-            {`ISET_IS, `OPC_IS_ADDis}: begin
+            `OPC_R_ADD,
+            `OPC_I_ADDi,
+            `OPC_RS_ADDs,
+            `OPC_IS_ADDis: begin
                 calc       = tgt_op + operand;
                 alu_result = calc[11:0];
                 carry      = calc[12];
                 overflow   = (~(tgt_op[11] ^ operand[11]) & (alu_result[11] ^ tgt_op[11]));
             end
-            {`ISET_R,  `OPC_R_SUB},
-            {`ISET_I,  `OPC_I_SUBi},
-            {`ISET_RS, `OPC_RS_SUBs},
-            {`ISET_IS, `OPC_IS_SUBis},
-            {`ISET_R,  `OPC_R_CMP},
-            {`ISET_I,  `OPC_I_CMPi},
-            {`ISET_RS, `OPC_RS_CMPs},
-            {`ISET_IS, `OPC_IS_CMPis}: begin
+            `OPC_R_SUB,
+            `OPC_I_SUBi,
+            `OPC_RS_SUBs,
+            `OPC_IS_SUBis,
+            `OPC_R_CMP,
+            `OPC_I_CMPi,
+            `OPC_RS_CMPs,
+            `OPC_IS_CMPis: begin
                 calc       = tgt_op + (~operand + 12'd1);
                 alu_result = calc[11:0];
                 carry      = calc[12];
                 overflow   = ((tgt_op[11] ^ operand[11]) & (alu_result[11] ^ tgt_op[11]));
             end
-            {`ISET_R, `OPC_R_NOT}: begin
+            `OPC_R_NOT: begin
                 alu_result = ~tgt_op;
             end
-            {`ISET_R, `OPC_R_AND},
-            {`ISET_I, `OPC_I_ANDi}: begin
+            `OPC_R_AND,
+            `OPC_I_ANDi: begin
                 alu_result = tgt_op & operand;
             end
-            {`ISET_R, `OPC_R_OR},
-            {`ISET_I, `OPC_I_ORi}: begin
+            `OPC_R_OR,
+            `OPC_I_ORi: begin
                 alu_result = tgt_op | operand;
             end
-            {`ISET_R, `OPC_R_XOR},
-            {`ISET_I, `OPC_I_XORi}: begin
+            `OPC_R_XOR,
+            `OPC_I_XORi: begin
                 alu_result = tgt_op ^ operand;
             end
-            {`ISET_R, `OPC_R_SL},
-            {`ISET_I, `OPC_I_SLi}: begin
+            `OPC_R_SL,
+            `OPC_I_SLi: begin
                 alu_result = tgt_op << operand[3:0];
             end
-            {`ISET_R,  `OPC_R_SR},
-            {`ISET_I,  `OPC_I_SRi},
-            {`ISET_RS, `OPC_RS_SRs},
-            {`ISET_IS, `OPC_IS_SRis}: begin
+            `OPC_R_SR,
+            `OPC_I_SRi,
+            `OPC_RS_SRs,
+            `OPC_IS_SRis: begin
                 if (stage_sgn_en)
                     alu_result = $signed(tgt_op) >>> operand[3:0];
                 else
                     alu_result = tgt_op >> operand[3:0];
             end
-            {`ISET_R,  `OPC_R_BCC}: begin
+            `OPC_R_BCC: begin
                 // Branch to absolute address in the target register
                 case (stage_bcc)
                     `BCC_RA: branch_taken = 1'b1;
@@ -157,8 +157,8 @@ module stage3ex(
                 endcase
                 alu_result = branch_taken ? tgt_op : pc_in;
             end
-            {`ISET_I,  `OPC_I_BCCi},
-            {`ISET_IS, `OPC_IS_BCCis}: begin
+            `OPC_I_BCCi,
+            `OPC_IS_BCCis: begin
                 // Branch relative to PC using the signed lower 6 bits of
                 // the immediate register
                 case (stage_bcc)
@@ -178,31 +178,31 @@ module stage3ex(
                 else
                     alu_result = pc_in;
             end
-            {`ISET_R, `OPC_R_LD}: begin
+            `OPC_R_LD: begin
                 alu_result = src_data_in; // Placeholder load behaviour
             end
-            {`ISET_I, `OPC_I_LDi}: begin
+            `OPC_I_LDi: begin
                 alu_result = src_data_in; // Placeholder immediate load behaviour
             end
-            {`ISET_R, `OPC_R_ST}: begin
+            `OPC_R_ST: begin
                 alu_result = tgt_op; // Address held in target register
                 store_data = src_data_in; // Data to store
             end
-            {`ISET_I, `OPC_I_STi}: begin
+            `OPC_I_STi: begin
                 alu_result = tgt_op; // Address held in target register
                 store_data = ir_reg; // Immediate data
             end
-            {`ISET_I,  `OPC_I_Li}: begin
+            `OPC_I_Li: begin
                 ir_comb = stage_imm_hilo ? {stage_imm_val, ir_reg[5:0]} : {ir_reg[11:6], stage_imm_val};
             end
-            {`ISET_IS, `OPC_IS_Lis}: begin
+            `OPC_IS_Lis: begin
                 ir_comb = {{6{stage_imm_val[5]}}, stage_imm_val};
             end
-            {`ISET_S, `OPC_S_SRMOV}: begin
+            `OPC_S_SRMOV: begin
                 // Move program counter to a special register (e.g. LR)
                 alu_result = pc_in;
             end
-            {`ISET_S, `OPC_S_SRBCC}: begin
+            `OPC_S_SRBCC: begin
                 case (stage_bcc)
                     `BCC_RA: branch_taken = 1'b1;
                     `BCC_EQ: branch_taken =  flags_in[`FLAG_Z];
@@ -220,7 +220,7 @@ module stage3ex(
                 else
                     alu_result = pc_in;
             end
-            {`ISET_S, `OPC_S_HLT}: begin
+            `OPC_S_HLT: begin
                 alu_result = 12'b0;
             end
             default: begin
