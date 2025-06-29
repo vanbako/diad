@@ -8,14 +8,12 @@ module stage5ro(
     input  wire        enable_in,
     input  wire [11:0] pc_in,
     input  wire [11:0] instr_in,
-    input  wire [3:0]  instr_set_in,
     input  wire [11:0] result_in,
     input  wire [3:0]  flags_in,
     // Register address prepared by the RA stage
     input  wire [3:0]  reg_waddr_in,
     output wire [11:0] pc_out,
     output wire [11:0] instr_out,
-    output wire [3:0]  instr_set_out,
     output wire [3:0]  reg_waddr,
     output wire [11:0] reg_wdata,
     output wire        reg_we,
@@ -50,5 +48,4 @@ module stage5ro(
     // Propagate program counter and instruction info
     assign pc_out        = pc_in;
     assign instr_out     = instr_in;
-    assign instr_set_out = instr_set_in;
 endmodule

@@ -1,12 +1,12 @@
-// henad.v
+// diad.v
 // Top-level Henad 5-stage RISC core
 `include "src/iset.vh"
 `include "src/opcodes.vh"
-module henad(
+module diad(
     input wire clk,
     input wire rst
 );
-    reg [11:0] ia_pc; // instruction address stage PC
+    reg [23:0] ia_pc; // instruction address stage PC
 
     // Enable registers for each pipeline (sub)stage
     reg stage1ia_en;
@@ -26,40 +26,29 @@ module henad(
     wire stage5ra_en_w;
     wire stage5ro_en_w;
 
-    wire [11:0] instr_mem_data;
-    wire [11:0] instr_mem_addr;
-    wire [11:0] data_mem_data;
-    wire [11:0] data_mem_addr;
-    wire [11:0] data_mem_wdata;
+    wire [23:0] instr_mem_data;
+    wire [23:0] instr_mem_addr;
+    wire [23:0] data_mem_data;
+    wire [23:0] data_mem_addr;
+    wire [23:0] data_mem_wdata;
     wire        data_mem_we;
 
-    wire [11:0] iaif_pc;
-    wire [11:0] ifid_pc;
-    wire [11:0] idex_pc;
-    wire [11:0] exma_pc;
-    wire [11:0] mamo_pc;
-    wire [11:0] mora_pc;
-    wire [11:0] raro_pc;
-    wire [11:0] final_pc;
+    wire [23:0] iaif_pc;
+    wire [23:0] ifid_pc;
+    wire [23:0] idex_pc;
+    wire [23:0] exma_pc;
+    wire [23:0] mamo_pc;
+    wire [23:0] mora_pc;
+    wire [23:0] raro_pc;
+    wire [23:0] final_pc;
 
-    wire [11:0] ifid_instr;
-    wire [11:0] idex_instr;
-    wire [11:0] exma_instr;
-    wire [11:0] mamo_instr;
-    wire [11:0] mora_instr;
-    wire [11:0] raro_instr;
-    wire [11:0] final_instr;
-
-
-    // Current instruction set (constant as SW is unused)
-    wire [3:0] ifid_set = `ISET_R;
-    // Instruction set value at each pipeline stage
-    wire [3:0] idex_set;
-    wire [3:0] exma_set;
-    wire [3:0] mamo_set;
-    wire [3:0] mora_set;
-    wire [3:0] raro_set;
-    wire [3:0] final_set;
+    wire [23:0] ifid_instr;
+    wire [23:0] idex_instr;
+    wire [23:0] exma_instr;
+    wire [23:0] mamo_instr;
+    wire [23:0] mora_instr;
+    wire [23:0] raro_instr;
+    wire [23:0] final_instr;
 
     // Simple control hazard handling
     // Detect branch instructions in the EX stage so that the
@@ -68,16 +57,16 @@ module henad(
     // Branch resolution occurs in the EX stage, but the result is latched and
     // visible at the MA stage.  Use the MA stage instruction information to
     // determine whether the previous instruction was a taken branch.
-    wire ex_is_branch = (({exma_set, exma_instr[11:8]} == {`ISET_R,  `OPC_R_BCC})  ||
-                         ({exma_set, exma_instr[11:8]} == {`ISET_I,  `OPC_I_BCCi}) ||
-                         ({exma_set, exma_instr[11:8]} == {`ISET_IS, `OPC_IS_BCCis}) ||
-                         ({exma_set, exma_instr[11:8]} == {`ISET_S,  `OPC_S_SRBCC})) &&
+    wire ex_is_branch = ((exma_instr[23:16] == `OPC_R_BCC)  ||
+                         (exma_instr[23:16] == `OPC_I_BCCi) ||
+                         (exma_instr[23:16] == `OPC_IS_BCCis) ||
+                         (exma_instr[23:16] == `OPC_S_SRBCC)) &&
                         ex_branch_taken;
 
     reg branch_stall;
     // Latch the resolved branch target so the PC can be updated on the
     // following cycle when a branch is taken.
-    reg [11:0] branch_pc;
+    reg [23:0] branch_pc;
 
     // Stall signal for read-after-write hazards
     wire hazard_stall;
@@ -90,7 +79,7 @@ module henad(
     always @(posedge clk or posedge rst) begin
         if (rst) begin
             branch_stall <= 1'b0;
-            branch_pc    <= 12'b0;
+            branch_pc    <= 24'b0;
         end else begin
             branch_stall <= ex_is_branch;
             if (ex_is_branch)
@@ -99,47 +88,43 @@ module henad(
     end
 
     // Decoded instruction fields from ID stage
-    wire [3:0] id_bcc;
-    wire [3:0] id_tgt_gp;
-    wire [3:0] id_tgt_sr;
-    wire [3:0] id_src_gp;
-    wire [3:0] id_src_sr;
-    wire       id_imm_en;
-    wire       id_imm_hilo;
-    wire [5:0] id_imm_val;
-    wire [5:0] id_off;
-    wire       id_sgn_en;
+    wire [3:0]  id_bcc;
+    wire [3:0]  id_tgt_gp;
+    wire [3:0]  id_tgt_sr;
+    wire [3:0]  id_src_gp;
+    wire [3:0]  id_src_sr;
+    wire        id_imm_en;
+    wire [11:0] id_imm_val;
+    wire        id_sgn_en;
 
     // Decoded instruction fields after the EX stage
-    wire [3:0] ex_bcc;
-    wire [3:0] ex_tgt_gp;
-    wire [3:0] ex_tgt_sr;
-    wire [3:0] ex_src_gp;
-    wire [3:0] ex_src_sr;
-    wire       ex_imm_en;
-    wire       ex_imm_hilo;
-    wire [5:0] ex_imm_val;
-    wire [5:0] ex_off;
-    wire       ex_sgn_en;
-    wire [11:0] ex_result;
-    wire [11:0] ex_store_data;
+    wire [3:0]  ex_bcc;
+    wire [3:0]  ex_tgt_gp;
+    wire [3:0]  ex_tgt_sr;
+    wire [3:0]  ex_src_gp;
+    wire [3:0]  ex_src_sr;
+    wire        ex_imm_en;
+    wire [11:0] ex_imm_val;
+    wire        ex_sgn_en;
+    wire [23:0] ex_result;
+    wire [23:0] ex_store_data;
     wire [3:0]  ex_flags;
     wire        ex_branch_taken;
-    wire [11:0] ma_result;
-    wire [11:0] ma_store_data;
+    wire [23:0] ma_result;
+    wire [23:0] ma_store_data;
     wire [3:0]  ma_flags;
-    wire [11:0] mo_result;
+    wire [23:0] mo_result;
     wire [3:0]  mo_flags;
-    wire [11:0] ra_result;
+    wire [23:0] ra_result;
     wire [3:0]  ra_flags;
     wire [3:0]  ra_reg_waddr;
-    wire [11:0] ro_result;
+    wire [23:0] ro_result;
     wire [3:0]  ro_flags;
     wire [3:0]  reg_waddr;
     wire        reg_we;
     wire        flag_we;
-    wire [11:0] lr_out;
-    wire [11:0] lr_wdata;
+    wire [23:0] lr_out;
+    wire [23:0] lr_wdata;
     wire        lr_we;
 
     // Update ia_pc and enable signals
@@ -149,10 +134,10 @@ module henad(
             ia_pc <= branch_pc;
         end else if (stage1ia_en) begin
             // Default sequential increment
-            ia_pc <= ia_pc + 12'd1;
+            ia_pc <= ia_pc + 24'd1;
         end
         if (rst) begin
-            ia_pc       <= 12'b0;
+            ia_pc       <= 24'b0;
             stage1ia_en <= 1'b0;
             stage1if_en <= 1'b0;
             stage2id_en <= 1'b0;
@@ -212,8 +197,8 @@ module henad(
     );
 
     // General purpose register file and flag register
-    wire [11:0] reg_src_data;
-    wire [11:0] reg_tgt_data;
+    wire [23:0] reg_src_data;
+    wire [23:0] reg_tgt_data;
     reggp u_reggp(
         .clk(clk),
         .rst(rst),
@@ -244,7 +229,6 @@ module henad(
         .lr_out(lr_out)
     );
 
-
     // Instruction set is fixed; no dynamic switching required.
 
     // ID stage
@@ -255,19 +239,15 @@ module henad(
         .enable_out(stage3ex_en_w),
         .pc_in(ifid_pc),
         .instr_in(ifid_instr),
-        .instr_set_in(ifid_set),
         .pc_out(idex_pc),
         .instr_out(idex_instr),
-        .instr_set_out(idex_set),
         .bcc_out(id_bcc),
         .tgt_gp_out(id_tgt_gp),
         .tgt_sr_out(id_tgt_sr),
         .src_gp_out(id_src_gp),
         .src_sr_out(id_src_sr),
         .imm_en_out(id_imm_en),
-        .imm_hilo_out(id_imm_hilo),
         .imm_val_out(id_imm_val),
-        .off_out(id_off),
         .sgn_en_out(id_sgn_en),
         .stall_in(stall_signal)
     );
@@ -280,16 +260,13 @@ module henad(
         .enable_out(stage4ma_en_w),
         .pc_in(idex_pc),
         .instr_in(idex_instr),
-        .instr_set_in(idex_set),
         .bcc_in(id_bcc),
         .tgt_gp_in(id_tgt_gp),
         .tgt_sr_in(id_tgt_sr),
         .src_gp_in(id_src_gp),
         .src_sr_in(id_src_sr),
         .imm_en_in(id_imm_en),
-        .imm_hilo_in(id_imm_hilo),
         .imm_val_in(id_imm_val),
-        .off_in(id_off),
         .sgn_en_in(id_sgn_en),
         .src_data_in(reg_src_data),
         .tgt_data_in(reg_tgt_data),
@@ -297,16 +274,13 @@ module henad(
         .flags_in(current_flags),
         .pc_out(exma_pc),
         .instr_out(exma_instr),
-        .instr_set_out(exma_set),
         .bcc_out(ex_bcc),
         .tgt_gp_out(ex_tgt_gp),
         .tgt_sr_out(ex_tgt_sr),
         .src_gp_out(ex_src_gp),
         .src_sr_out(ex_src_sr),
         .imm_en_out(ex_imm_en),
-        .imm_hilo_out(ex_imm_hilo),
         .imm_val_out(ex_imm_val),
-        .off_out(ex_off),
         .sgn_en_out(ex_sgn_en),
         .result_out(ex_result),
         .flags_out(ex_flags),
@@ -322,14 +296,12 @@ module henad(
         .enable_out(stage4mo_en_w),
         .pc_in(exma_pc),
         .instr_in(exma_instr),
-        .instr_set_in(exma_set),
         .result_in(ex_result),
         .store_data_in(ex_store_data),
         .flags_in(ex_flags),
         .mem_addr(data_mem_addr),
         .pc_out(mamo_pc),
         .instr_out(mamo_instr),
-        .instr_set_out(mamo_set),
         .result_out(ma_result),
         .flags_out(ma_flags),
         .store_data_out(ma_store_data)
@@ -343,7 +315,6 @@ module henad(
         .enable_out(stage5ra_en_w),
         .pc_in(mamo_pc),
         .instr_in(mamo_instr),
-        .instr_set_in(mamo_set),
         .result_in(ma_result),
         .store_data_in(ma_store_data),
         .flags_in(ma_flags),
@@ -352,7 +323,6 @@ module henad(
         .mem_we(data_mem_we),
         .pc_out(mora_pc),
         .instr_out(mora_instr),
-        .instr_set_out(mora_set),
         .result_out(mo_result),
         .flags_out(mo_flags)
     );
@@ -365,12 +335,10 @@ module henad(
         .enable_out(stage5ro_en_w),
         .pc_in(mora_pc),
         .instr_in(mora_instr),
-        .instr_set_in(mora_set),
         .result_in(mo_result),
         .flags_in(mo_flags),
         .pc_out(raro_pc),
         .instr_out(raro_instr),
-        .instr_set_out(raro_set),
         .result_out(ra_result),
         .flags_out(ra_flags),
         .reg_waddr_out(ra_reg_waddr)
@@ -383,13 +351,11 @@ module henad(
         .enable_in(stage5ro_en),
         .pc_in(raro_pc),
         .instr_in(raro_instr),
-        .instr_set_in(raro_set),
         .result_in(ra_result),
         .flags_in(ra_flags),
         .reg_waddr_in(ra_reg_waddr),
         .pc_out(final_pc),
         .instr_out(final_instr),
-        .instr_set_out(final_set),
         .reg_waddr(reg_waddr),
         .reg_wdata(ro_result),
         .reg_we(reg_we),
@@ -404,11 +370,8 @@ module henad(
         .id_src_gp(id_src_gp),
         .id_tgt_gp(id_tgt_gp),
         .idex_instr(idex_instr),
-        .idex_set(idex_set),
         .exma_instr(exma_instr),
-        .exma_set(exma_set),
         .mamo_instr(mamo_instr),
-        .mamo_set(mamo_set),
         .stall(hazard_stall)
     );
 endmodule

@@ -7,12 +7,10 @@ module stage5ra(
     output wire        enable_out,
     input  wire [11:0] pc_in,
     input  wire [11:0] instr_in,
-    input  wire [3:0]  instr_set_in,
     input  wire [11:0] result_in,
     input  wire [3:0]  flags_in,
     output wire [11:0] pc_out,
     output wire [11:0] instr_out,
-    output wire [3:0]  instr_set_out,
     output wire [11:0] result_out,
     output wire [3:0]  flags_out,
     // Decoded register address for the writeback stage
@@ -32,7 +30,6 @@ module stage5ra(
     // Latch registers between RA and RO stages
     reg [11:0] pc_latch;
     reg [11:0] instr_latch;
-    reg [3:0]  set_latch;
     reg [11:0] result_latch;
     reg [3:0]  flags_latch;
     reg [3:0]  waddr_latch;
@@ -41,14 +38,12 @@ module stage5ra(
         if (rst) begin
             pc_latch    <= 12'b0;
             instr_latch <= 12'b0;
-            set_latch   <= `ISET_R;
             result_latch<= 12'b0;
             flags_latch <= 4'b0;
             waddr_latch <= 4'b0;
         end else if (enable_in) begin
             pc_latch     <= stage_pc;
             instr_latch  <= instr_in;
-            set_latch    <= instr_set_in;
             result_latch <= stage_result;
             flags_latch  <= stage_flags;
             waddr_latch  <= stage_waddr;
@@ -57,7 +52,6 @@ module stage5ra(
 
     assign pc_out        = pc_latch;
     assign instr_out     = instr_latch;
-    assign instr_set_out = set_latch;
     assign result_out    = result_latch;
     assign flags_out     = flags_latch;
     assign reg_waddr_out = waddr_latch;

@@ -1,5 +1,5 @@
 // flags.vh
-// Henad 12-bit RISC: Status flag bit definitions
+// Diad 24-bit RISC: Status flag bit definitions
 `ifndef FLAGS_VH
 `define FLAGS_VH
 

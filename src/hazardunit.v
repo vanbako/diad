@@ -14,12 +14,9 @@ module hazardunit(
 
     // Instructions further down the pipeline.  Only the sets and opcodes are
     // required to determine if they will write back to the register file.
-    input  wire [11:0] idex_instr,
-    input  wire [3:0]  idex_set,
-    input  wire [11:0] exma_instr,
-    input  wire [3:0]  exma_set,
-    input  wire [11:0] mamo_instr,
-    input  wire [3:0]  mamo_set,
+    input  wire [23:0] idex_instr,
+    input  wire [23:0] exma_instr,
+    input  wire [23:0] mamo_instr,
 
     // Asserted when a hazard is detected
     output wire        stall
@@ -30,15 +27,15 @@ module hazardunit(
     `undef DEFINE_REG_WRITE_FN
 
     // Destination register numbers in the stages ahead of decode
-    wire [3:0] ex_waddr = idex_instr[7:4];
-    wire [3:0] ma_waddr = exma_instr[7:4];
-    wire [3:0] mo_waddr = mamo_instr[7:4];
+    wire [3:0] ex_waddr = idex_instr[15:12];
+    wire [3:0] ma_waddr = exma_instr[15:12];
+    wire [3:0] mo_waddr = mamo_instr[15:12];
 
-    wire hazard_ex = reg_write_fn(idex_set,  idex_instr[11:8]) &&
+    wire hazard_ex = reg_write_fn(idex_instr[23:16]) &&
                      ((ex_waddr == id_src_gp) || (ex_waddr == id_tgt_gp));
-    wire hazard_ma = reg_write_fn(exma_set,  exma_instr[11:8]) &&
+    wire hazard_ma = reg_write_fn(exma_instr[23:16]) &&
                      ((ma_waddr == id_src_gp) || (ma_waddr == id_tgt_gp));
-    wire hazard_mo = reg_write_fn(mamo_set, mamo_instr[11:8]) &&
+    wire hazard_mo = reg_write_fn(mamo_instr[23:16]) &&
                      ((mo_waddr == id_src_gp) || (mo_waddr == id_tgt_gp));
 
     assign stall = hazard_ex || hazard_ma || hazard_mo;

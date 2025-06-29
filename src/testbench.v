@@ -1,5 +1,5 @@
 // testbench.v
-// Basic simulation testbench for the Henad core.  The goal is simply
+// Basic simulation testbench for the Diad core.  The goal is simply
 // to exercise the pipeline and print out the program counter value at
 // every stage so that the flow through the pipeline can be observed.
 
@@ -11,7 +11,7 @@ module testbench;
     reg rst;
 
     // Instantiate the core
-    henad uut (
+    diad uut (
         .clk(clk),
         .rst(rst)
     );
@@ -58,17 +58,6 @@ module testbench;
                  uut.mora_instr,
                  uut.raro_instr,
                  uut.final_instr);
-`endif
-`ifdef DEBUGINSTRSET
-        $display("tick %0d : IFID_set=%h IDEX_set=%h EXMA_set=%h MAMO_set=%h MORA_set=%h RARO_set=%h FINAL_set=%h",
-                 tick,
-                 uut.ifid_set,
-                 uut.idex_set,
-                 uut.exma_set,
-                 uut.mamo_set,
-                 uut.mora_set,
-                 uut.raro_set,
-                 uut.final_set);
 `endif
 `ifdef DEBUGRES
         $display("tick %0d : EX_res=%h MA_res=%h MO_res=%h RA_res=%h RO_res=%h WE=%b WADDR=%h",

@@ -8,7 +8,6 @@ module stage4mo(
     output wire        enable_out,
     input  wire [11:0] pc_in,
     input  wire [11:0] instr_in,
-    input  wire [3:0]  instr_set_in,
     input  wire [11:0] result_in,
     input  wire [11:0] store_data_in,
     input  wire [3:0]  flags_in,
@@ -16,7 +15,6 @@ module stage4mo(
     input  wire [11:0] mem_rdata,
     output wire [11:0] pc_out,
     output wire [11:0] instr_out,
-    output wire [3:0]  instr_set_out,
     output wire [11:0] result_out,
     output wire [3:0]  flags_out,
     // Write interface for the data memory
@@ -45,7 +43,6 @@ module stage4mo(
     // Latch registers between the MO stage and the Register Address stage
     reg [11:0] pc_latch;
     reg [11:0] instr_latch;
-    reg [3:0]  set_latch;
     reg [11:0] result_latch;
     reg [3:0]  flags_latch;
 
@@ -67,7 +64,6 @@ module stage4mo(
 
     assign pc_out        = pc_latch;
     assign instr_out     = instr_latch;
-    assign instr_set_out = set_latch;
     assign result_out    = result_latch;
     assign flags_out     = flags_latch;
 endmodule

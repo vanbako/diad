@@ -3,7 +3,7 @@
 `ifndef BCC_VH
 `define BCC_VH
 
-// [7:4] BCC field
+// [15:12] BCC field
 `define BCC_RA 4'h0 // always
 `define BCC_EQ 4'h1 // equal
 `define BCC_NE 4'h2 // not equal
