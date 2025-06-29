@@ -20,7 +20,8 @@ module stage2id(
     output wire [3:0]  src_gp_out,
     output wire [3:0]  src_sr_out,
     output wire        imm_en_out,
-    output wire [23:0] imm_val_out,
+    // Lower 12 bits hold the immediate value extracted from the instruction
+    output wire [11:0] imm_val_out,
     output wire        sgn_en_out,
     // Stall signal from the hazard unit. When asserted, a NOP is
     // inserted instead of the decoded instruction.

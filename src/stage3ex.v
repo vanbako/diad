@@ -44,7 +44,8 @@ module stage3ex(
     // Propagate the enable signal to the next stage.  For the special
     // halt instruction the pipeline is stalled by clearing the enable
     // line.
-    assign enable_out = (instr_in[11:8] == `OPC_S_HLT) ? 1'b0 : enable_in;
+    // Halt instructions reside in the upper opcode byte
+    assign enable_out = (instr_in[23:16] == `OPC_S_HLT) ? 1'b0 : enable_in;
 
     // Stage output prior to latching.  This is kept as a separate wire so
     // that future execute logic can easily be inserted here.
