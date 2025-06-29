@@ -6,19 +6,19 @@ module stage5ro(
     input  wire        clk,
     input  wire        rst,
     input  wire        enable_in,
-    input  wire [11:0] pc_in,
-    input  wire [11:0] instr_in,
-    input  wire [11:0] result_in,
+    input  wire [23:0] pc_in,
+    input  wire [23:0] instr_in,
+    input  wire [23:0] result_in,
     input  wire [3:0]  flags_in,
     // Register address prepared by the RA stage
     input  wire [3:0]  reg_waddr_in,
-    output wire [11:0] pc_out,
-    output wire [11:0] instr_out,
+    output wire [23:0] pc_out,
+    output wire [23:0] instr_out,
     output wire [3:0]  reg_waddr,
-    output wire [11:0] reg_wdata,
+    output wire [23:0] reg_wdata,
     output wire        reg_we,
     // Write interface for the link register
-    output wire [11:0] lr_wdata,
+    output wire [23:0] lr_wdata,
     output wire        lr_we,
     output wire [3:0]  flag_wdata,
     output wire        flag_we
@@ -28,7 +28,8 @@ module stage5ro(
     `include "src/iset.vh"
     `undef DEFINE_REG_WRITE_FN
     // Decode opcode for write-back decisions
-    wire [3:0] opcode = instr_in[11:8];
+    // Use the upper byte of the instruction for opcode decoding
+    wire [7:0] opcode = instr_in[23:16];
 
     wire reg_write = reg_write_fn(opcode);
 
