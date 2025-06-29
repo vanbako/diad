@@ -8,36 +8,36 @@ module stage3ex(
     input  wire        rst,
     input  wire        enable_in,
     output wire        enable_out,
-    input  wire [11:0] pc_in,
-    input  wire [11:0] instr_in,
+    input  wire [23:0] pc_in,
+    input  wire [23:0] instr_in,
     input  wire [3:0]  bcc_in,
     input  wire [3:0]  tgt_gp_in,
     input  wire [3:0]  tgt_sr_in,
     input  wire [3:0]  src_gp_in,
     input  wire [3:0]  src_sr_in,
     input  wire        imm_en_in,
-    input  wire [5:0]  imm_val_in,
+    input  wire [11:0]  imm_val_in,
     input  wire        sgn_en_in,
-    input  wire [11:0] src_data_in,
-    input  wire [11:0] tgt_data_in,
+    input  wire [23:0] src_data_in,
+    input  wire [23:0] tgt_data_in,
     // Current value of the link register
-    input  wire [11:0] lr_in,
+    input  wire [23:0] lr_in,
     // Current flag register value for conditional branches
     input  wire [3:0]  flags_in,
-    output wire [11:0] pc_out,
-    output wire [11:0] instr_out,
+    output wire [23:0] pc_out,
+    output wire [23:0] instr_out,
     output wire [3:0]  bcc_out,
     output wire [3:0]  tgt_gp_out,
     output wire [3:0]  tgt_sr_out,
     output wire [3:0]  src_gp_out,
     output wire [3:0]  src_sr_out,
     output wire        imm_en_out,
-    output wire [5:0]  imm_val_out,
+    output wire [11:0]  imm_val_out,
     output wire        sgn_en_out,
-    output wire [11:0] result_out,
+    output wire [23:0] result_out,
     output wire [3:0]  flags_out,
     // Data value for store instructions
-    output wire [11:0] store_data_out,
+    output wire [23:0] store_data_out,
     // Asserted when a branch condition is met
     output wire        branch_taken_out
 );
@@ -48,7 +48,7 @@ module stage3ex(
 
     // Stage output prior to latching.  This is kept as a separate wire so
     // that future execute logic can easily be inserted here.
-    wire [11:0] stage_pc   = pc_in;
+    wire [23:0] stage_pc   = pc_in;
     wire [3:0]  stage_bcc  = bcc_in;
     wire [3:0]  stage_tgt_gp = tgt_gp_in;
     wire [3:0]  stage_tgt_sr = tgt_sr_in;
@@ -59,26 +59,26 @@ module stage3ex(
     wire        stage_sgn_en   = sgn_en_in;
 
     // Execution logic (formerly in a separate ALU module)
-    reg [11:0] alu_result;
+    reg [23:0] alu_result;
     reg [3:0]  alu_flags;
-    reg [12:0] calc;
+    reg [24:0] calc;
     reg        carry;
     reg        overflow;
-    reg [11:0] operand;
-    reg [11:0] tgt_op;
-    reg [11:0] store_data;
+    reg [23:0] operand;
+    reg [23:0] tgt_op;
+    reg [23:0] store_data;
     reg        branch_taken;
     // Immediate register used by immediate instructions
-    reg [11:0] ir_comb;
-    reg [11:0] ir_reg;
+    reg [23:0] ir_comb;
+    reg [23:0] ir_reg;
 
     always @* begin
         operand       = stage_imm_en ? ir_reg : src_data_in;
         tgt_op        = tgt_data_in;
-        alu_result    = 12'b0;
+        alu_result    = 24'b0;
         carry         = 1'b0;
         overflow      = 1'b0;
-        store_data    = 12'b0;
+        store_data    = 24'b0;
         branch_taken  = 1'b0;
 
         // Combine instruction set and opcode so that opcodes that share the same

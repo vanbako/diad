@@ -36,31 +36,36 @@ module stage2id(
     wire [23:0] forwarded_instr = (opcode == `OPC_NOP) ? 24'b0 : instr_in;
 
     // Decode immediate, register and branch fields
-    wire [3:0] bcc_w      = forwarded_instr[15:12];
-    wire [7:0] fwd_opcode = forwarded_instr[23:16];
-    wire       use_src    = reg_src_read_fn(fwd_opcode);
-    wire       use_tgt    = reg_tgt_read_fn(fwd_opcode);
-    wire [3:0] tgt_gp_w   = (stage_set == `ISET_S || !use_tgt) ? 4'b0 : forwarded_instr[7:4];
-    wire [3:0] tgt_sr_w   = (stage_set == `ISET_S) ? forwarded_instr[7:4] : 4'b0;
-    wire [3:0] src_gp_w   = (stage_set == `ISET_S || !use_src) ? 4'b0 : forwarded_instr[3:0];
-    wire [3:0] src_sr_w   = (stage_set == `ISET_S) ? forwarded_instr[3:0] : 4'b0;
-    wire [23:0] imm_val_w = forwarded_instr[23:0];
-    wire       instr_lui  = fwd_opcode == `OPC_I_LUI;
-    wire       sgn_en_w   = (stage_set == `ISET_RS) || (stage_set == `ISET_IS);
-    wire       imm_en_w   = ((stage_set == `ISET_I) || (stage_set == `ISET_IS)) &&
-                            !(instr_lui);
+    wire [3:0]  bcc_w      = forwarded_instr[15:12];
+    wire [7:0]  fwd_opcode = forwarded_instr[23:16];
+    wire        use_src    = reg_src_read_fn(fwd_opcode);
+    wire        use_tgt    = reg_tgt_read_fn(fwd_opcode);
+// TODO: Handle with a list of instructions that use immediate values
+    wire [3:0]  tgt_gp_w   = ( || !use_tgt) ? 4'b0 : forwarded_instr[7:4];
+// TODO: Handle with a list of instructions that use immediate values
+    wire [3:0]  tgt_sr_w   = () ? forwarded_instr[7:4] : 4'b0;
+// TODO: Handle with a list of instructions that use immediate values
+    wire [3:0]  src_gp_w   = ( || !use_src) ? 4'b0 : forwarded_instr[3:0];
+// TODO: Handle with a list of instructions that use immediate values
+    wire [3:0]  src_sr_w   = () ? forwarded_instr[3:0] : 4'b0;
+// TODO: Check if this is correct
+    wire [23:0] imm_val_w  = forwarded_instr[23:0];
+    wire        instr_lui  = (fwd_opcode == `OPC_I_LUI);
+// TODO: Handle with a list of instructions that use immediate values
+    wire        sgn_en_w   = ();
+    wire        imm_en_w   = () &&
+                             !(instr_lui);
 
     // Latch outputs for the next pipeline stage
-    reg [11:0]  pc_latch;
-    reg [11:0]  instr_latch;
-    reg [3:0]   set_latch;
+    reg [23:0]  pc_latch;
+    reg [23:0]  instr_latch;
     reg [3:0]   bcc_latch;
     reg [3:0]   tgt_gp_latch;
     reg [3:0]   tgt_sr_latch;
     reg [3:0]   src_gp_latch;
     reg [3:0]   src_sr_latch;
     reg         imm_en_latch;
-    reg [5:0]   imm_val_latch;
+    reg [11:0]  imm_val_latch;
     reg         sgn_en_latch;
     
     always @(posedge clk or posedge rst) begin
