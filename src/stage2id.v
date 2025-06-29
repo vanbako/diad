@@ -40,20 +40,60 @@ module stage2id(
     wire [7:0]  fwd_opcode = forwarded_instr[23:16];
     wire        use_src    = reg_src_read_fn(fwd_opcode);
     wire        use_tgt    = reg_tgt_read_fn(fwd_opcode);
-// TODO: Handle with a list of instructions that use immediate values
-    wire [3:0]  tgt_gp_w   = ( || !use_tgt) ? 4'b0 : forwarded_instr[7:4];
-// TODO: Handle with a list of instructions that use immediate values
-    wire [3:0]  tgt_sr_w   = () ? forwarded_instr[7:4] : 4'b0;
-// TODO: Handle with a list of instructions that use immediate values
-    wire [3:0]  src_gp_w   = ( || !use_src) ? 4'b0 : forwarded_instr[3:0];
-// TODO: Handle with a list of instructions that use immediate values
-    wire [3:0]  src_sr_w   = () ? forwarded_instr[3:0] : 4'b0;
+    // Instructions that operate on the special register file rather than the
+    // general purpose registers
+    wire special_instr = (fwd_opcode == `OPC_S_SRMOV) ||
+                         (fwd_opcode == `OPC_S_SRBCC);
+
+    // Target/source register numbers.  When the instruction does not read from
+    // the general purpose register file or when it is a special register
+    // instruction, the address is forced to zero so that the hazard unit sees
+    // no dependency.
+    wire [3:0]  tgt_gp_w   = (special_instr || !use_tgt) ? 4'b0
+                                               : forwarded_instr[7:4];
+    wire [3:0]  tgt_sr_w   = special_instr ? forwarded_instr[7:4] : 4'b0;
+    wire [3:0]  src_gp_w   = (special_instr || !use_src) ? 4'b0
+                                               : forwarded_instr[3:0];
+    wire [3:0]  src_sr_w   = special_instr ? forwarded_instr[3:0] : 4'b0;
 // TODO: Check if this is correct
     wire [23:0] imm_val_w  = forwarded_instr[23:0];
     wire        instr_lui  = (fwd_opcode == `OPC_I_LUI);
-// TODO: Handle with a list of instructions that use immediate values
-    wire        sgn_en_w   = ();
-    wire        imm_en_w   = () &&
+    // Signed operations and immediate based instructions
+    wire signed_instr = (fwd_opcode == `OPC_RS_ADDs)  ||
+                        (fwd_opcode == `OPC_RS_SUBs)  ||
+                        (fwd_opcode == `OPC_RS_SRs)   ||
+                        (fwd_opcode == `OPC_RS_CMPs)  ||
+                        (fwd_opcode == `OPC_IS_MOVis) ||
+                        (fwd_opcode == `OPC_IS_ADDis) ||
+                        (fwd_opcode == `OPC_IS_SUBis) ||
+                        (fwd_opcode == `OPC_IS_SRis)  ||
+                        (fwd_opcode == `OPC_IS_CMPis) ||
+                        (fwd_opcode == `OPC_IS_BCCis) ||
+                        (fwd_opcode == `OPC_IS_Lis);
+
+    wire imm_instr = (fwd_opcode == `OPC_I_MOVi)  ||
+                      (fwd_opcode == `OPC_I_ADDi) ||
+                      (fwd_opcode == `OPC_I_SUBi) ||
+                      (fwd_opcode == `OPC_I_ANDi) ||
+                      (fwd_opcode == `OPC_I_ORi)  ||
+                      (fwd_opcode == `OPC_I_XORi) ||
+                      (fwd_opcode == `OPC_I_SLi)  ||
+                      (fwd_opcode == `OPC_I_SRi)  ||
+                      (fwd_opcode == `OPC_I_CMPi) ||
+                      (fwd_opcode == `OPC_I_BCCi)||
+                      (fwd_opcode == `OPC_I_LDi)  ||
+                      (fwd_opcode == `OPC_I_STi)  ||
+                      (fwd_opcode == `OPC_I_Li)   ||
+                      (fwd_opcode == `OPC_IS_MOVis) ||
+                      (fwd_opcode == `OPC_IS_ADDis) ||
+                      (fwd_opcode == `OPC_IS_SUBis)||
+                      (fwd_opcode == `OPC_IS_SRis) ||
+                      (fwd_opcode == `OPC_IS_CMPis)||
+                      (fwd_opcode == `OPC_IS_BCCis)||
+                      (fwd_opcode == `OPC_IS_Lis);
+
+    wire        sgn_en_w   = signed_instr;
+    wire        imm_en_w   = imm_instr &&
                              !(instr_lui);
 
     // Latch outputs for the next pipeline stage
