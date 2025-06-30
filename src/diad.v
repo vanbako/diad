@@ -132,12 +132,8 @@ module diad(
         if (branch_stall) begin
             // Use the resolved branch address when stalling
             ia_pc <= branch_pc;
-        end else if (stage1if_en) begin
-            // Default sequential increment when the fetch stage is active
-            // Using the IF enable prevents the PC from advancing an extra
-            // cycle after a branch resolves. Without this check the PC
-            // would increment before the fetch stage resumes, skipping
-            // the branch target instruction.
+        end else if (stage1ia_en) begin
+            // Default sequential increment
             ia_pc <= ia_pc + 24'd1;
         end
         if (rst) begin
