@@ -28,7 +28,8 @@ module testbench;
         rst = 1'b0;
 
         // Let the simulation run for some cycles
-        repeat (80) @(posedge clk);
+        // Extended to 220 cycles so later instructions fully execute
+        repeat (220) @(posedge clk);
         $finish;
     end
 
