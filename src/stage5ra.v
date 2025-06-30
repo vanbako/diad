@@ -25,7 +25,13 @@ module stage5ra(
     wire [23:0] stage_result = result_in;
     wire [3:0]  stage_flags  = flags_in;
     // Target register address extracted from the instruction
-    wire [3:0]  stage_waddr  = instr_in[7:4];
+    // The target register number is encoded in bits [15:12] of the
+    // instruction word for both register and immediate forms.  The
+    // previous implementation incorrectly extracted bits [7:4], which
+    // caused immediate instructions like ADDis to write their results
+    // to R0 instead of the intended register.  Use bits [15:12] so the
+    // writeback stage receives the correct destination address.
+    wire [3:0]  stage_waddr  = instr_in[15:12];
 
     // Latch registers between RA and RO stages
     reg [23:0] pc_latch;
