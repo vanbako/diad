@@ -64,6 +64,9 @@ module diad(
                         ex_branch_taken;
 
     reg branch_stall;
+    // Track the previous branch state so a single-cycle pulse can be
+    // generated when a branch resolves.
+    reg prev_branch;
     // Latch the resolved branch target so the PC can be updated on the
     // following cycle when a branch is taken.
     reg [23:0] branch_pc;
@@ -79,9 +82,12 @@ module diad(
     always @(posedge clk or posedge rst) begin
         if (rst) begin
             branch_stall <= 1'b0;
+            prev_branch  <= 1'b0;
             branch_pc    <= 24'b0;
         end else begin
-            branch_stall <= ex_is_branch;
+            // Generate a one-cycle stall when a branch is taken.
+            branch_stall <= ex_is_branch && !prev_branch;
+            prev_branch  <= ex_is_branch;
             if (ex_is_branch)
                 branch_pc <= ex_result;
         end

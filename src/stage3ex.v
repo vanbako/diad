@@ -216,8 +216,11 @@ module stage3ex(
                 ir_comb = {{6{stage_imm_val[5]}}, stage_imm_val};
             end
             `OPC_S_SRMOV: begin
-                // Move program counter to a special register (e.g. LR)
-                alu_result = pc_in;
+                // Move the program counter plus one to the link register so
+                // that a subsequent SRBRA can return to the following
+                // instruction. Using pc_in directly would cause the branch
+                // target to point back to this instruction.
+                alu_result = pc_in + 24'd1;
             end
             `OPC_S_SRBCC: begin
                 case (stage_bcc)
