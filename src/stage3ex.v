@@ -160,8 +160,9 @@ module stage3ex(
             end
             `OPC_I_BCCi,
             `OPC_IS_BCCis: begin
-                // Branch relative to PC using the signed lower 6 bits of
-                // the immediate register
+                // Branch relative to PC using the immediate value from the
+                // decode stage.  The unsigned variant uses a zero-extended
+                // offset while the signed version sign extends the value.
                 case (stage_bcc)
                     `BCC_RA: branch_taken = 1'b1;
                     `BCC_EQ: branch_taken =  flags_in[`FLAG_Z];
@@ -174,10 +175,14 @@ module stage3ex(
                     `BCC_GE: branch_taken = ~(flags_in[`FLAG_N] ^ flags_in[`FLAG_V]);
                     default: branch_taken = 1'b0;
                 endcase
-                if (branch_taken)
-                    alu_result = pc_in + {{6{ir_reg[5]}}, ir_reg[5:0]};
-                else
+                if (branch_taken) begin
+                    if (instr_in[23:16] == `OPC_I_BCCi)
+                        alu_result = pc_in + {12'b0, stage_imm_val};
+                    else
+                        alu_result = pc_in + {{12{stage_imm_val[11]}}, stage_imm_val};
+                end else begin
                     alu_result = pc_in;
+                end
             end
             `OPC_R_LD: begin
                 alu_result = src_data_in; // Placeholder load behaviour
@@ -218,7 +223,7 @@ module stage3ex(
                     default: branch_taken = 1'b0;
                 endcase
                 if (branch_taken)
-                    alu_result = lr_in + {{6{stage_imm_val[5]}}, stage_imm_val[5:0]};
+                    alu_result = lr_in + {{12{stage_imm_val[11]}}, stage_imm_val};
                 else
                     alu_result = pc_in;
             end
