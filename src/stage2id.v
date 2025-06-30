@@ -50,14 +50,19 @@ module stage2id(
     // the general purpose register file or when it is a special register
     // instruction, the address is forced to zero so that the hazard unit sees
     // no dependency.
+    // Extract register numbers using the instruction format defined in
+    // design.txt. Target registers reside in bits [15:12] and source
+    // registers in bits [11:8]. The previous implementation incorrectly
+    // used bits [7:4] and [3:0] which caused immediate instructions like
+    // ADDis to read the wrong registers and stalled the pipeline.
     wire [3:0]  tgt_gp_w   = (special_instr || !use_tgt) ? 4'b0
-                                               : forwarded_instr[7:4];
-    wire [3:0]  tgt_sr_w   = special_instr ? forwarded_instr[7:4] : 4'b0;
+                                               : forwarded_instr[15:12];
+    wire [3:0]  tgt_sr_w   = special_instr ? forwarded_instr[15:12] : 4'b0;
     wire [3:0]  src_gp_w   = (special_instr || !use_src) ? 4'b0
-                                               : forwarded_instr[3:0];
-    wire [3:0]  src_sr_w   = special_instr ? forwarded_instr[3:0] : 4'b0;
-// TODO: Check if this is correct
-    wire [23:0] imm_val_w  = forwarded_instr[23:0];
+                                               : forwarded_instr[11:8];
+    wire [3:0]  src_sr_w   = special_instr ? forwarded_instr[11:8] : 4'b0;
+
+    wire [11:0] imm_val_w  = forwarded_instr[11:0];
     // Signed operations and immediate based instructions
     wire signed_instr = (fwd_opcode == `OPC_RS_ADDs)  ||
                         (fwd_opcode == `OPC_RS_SUBs)  ||
@@ -109,28 +114,28 @@ module stage2id(
     
     always @(posedge clk or posedge rst) begin
         if (rst) begin
-            pc_latch       <= 12'b0;
-            instr_latch    <= 12'b0;
+            pc_latch       <= 24'b0;
+            instr_latch    <= 24'b0;
             bcc_latch      <= 4'b0;
             tgt_gp_latch   <= 4'b0;
             tgt_sr_latch   <= 4'b0;
             src_gp_latch   <= 4'b0;
             src_sr_latch   <= 4'b0;
             imm_en_latch   <= 1'b0;
-            imm_val_latch  <= 6'b0;
+            imm_val_latch  <= 12'b0;
             sgn_en_latch   <= 1'b0;
         end else if (enable_in) begin
             if (stall_in) begin
                 // Insert a bubble when stalling
                 pc_latch       <= pc_in;
-                instr_latch    <= 12'b0;
+                instr_latch    <= 24'b0;
                 bcc_latch      <= 4'b0;
                 tgt_gp_latch   <= 4'b0;
                 tgt_sr_latch   <= 4'b0;
                 src_gp_latch   <= 4'b0;
                 src_sr_latch   <= 4'b0;
                 imm_en_latch   <= 1'b0;
-                imm_val_latch  <= 6'b0;
+                imm_val_latch  <= 12'b0;
                 sgn_en_latch   <= 1'b0;
             end else begin
                 pc_latch   <= pc_in;
