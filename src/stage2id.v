@@ -73,8 +73,7 @@ module stage2id(
                         (fwd_opcode == `OPC_IS_SUBis) ||
                         (fwd_opcode == `OPC_IS_SRis)  ||
                         (fwd_opcode == `OPC_IS_CMPis) ||
-                        (fwd_opcode == `OPC_IS_BCCis) ||
-                        (fwd_opcode == `OPC_IS_Lis);
+                        (fwd_opcode == `OPC_IS_BCCis);
 
     wire imm_instr = (fwd_opcode == `OPC_I_MOVi)  ||
                       (fwd_opcode == `OPC_I_ADDi) ||
@@ -88,14 +87,13 @@ module stage2id(
                       (fwd_opcode == `OPC_I_BCCi)||
                       (fwd_opcode == `OPC_I_LDi)  ||
                       (fwd_opcode == `OPC_I_STi)  ||
-                      (fwd_opcode == `OPC_I_Li)   ||
                       (fwd_opcode == `OPC_IS_MOVis) ||
                       (fwd_opcode == `OPC_IS_ADDis) ||
                       (fwd_opcode == `OPC_IS_SUBis)||
                       (fwd_opcode == `OPC_IS_SRis) ||
                       (fwd_opcode == `OPC_IS_CMPis)||
                       (fwd_opcode == `OPC_IS_BCCis)||
-                      (fwd_opcode == `OPC_IS_Lis);
+                      (fwd_opcode == `OPC_S_LUI);
 
     wire        sgn_en_w   = signed_instr;
     wire        imm_en_w   = imm_instr;

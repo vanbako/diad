@@ -208,12 +208,9 @@ module stage3ex(
                 alu_result = tgt_op; // Address held in target register
                 store_data = imm_unsigned; // Immediate data
             end
-            `OPC_I_Li: begin
-                // Load immediate into the lower half of the IR
-                ir_comb = {ir_reg[11:6], stage_imm_val};
-            end
-            `OPC_IS_Lis: begin
-                ir_comb = {{6{stage_imm_val[5]}}, stage_imm_val};
+            `OPC_S_LUI: begin
+                // Load immediate into the upper half of the IR
+                ir_comb = {stage_imm_val, ir_comb[11:0]};
             end
             `OPC_S_SRMOV: begin
                 // Move program counter to a special register (e.g. LR)

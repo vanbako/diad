@@ -40,7 +40,6 @@
 `define OPC_I_BCCi   8'h2C
 `define OPC_I_LDi    8'h2D
 `define OPC_I_STi    8'h2E
-`define OPC_I_Li     8'h2F
 
 // IMMEDIATE SIGNED
 `define OPC_IS_MOVis 8'h32
@@ -49,9 +48,9 @@
 `define OPC_IS_SRis  8'h3A
 `define OPC_IS_CMPis 8'h3B
 `define OPC_IS_BCCis 8'h3C
-`define OPC_IS_Lis   8'h3F
 
 // SPECIAL
+`define OPC_S_LUI    8'h40
 `define OPC_S_SRMOV  8'h42
 `define OPC_S_SRBCC  8'h4C
 `define OPC_S_HLT    8'h4F
