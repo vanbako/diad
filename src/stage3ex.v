@@ -73,8 +73,18 @@ module stage3ex(
     reg [23:0] ir_comb;
     reg [23:0] ir_reg;
 
+    wire [23:0] imm_signed  = {{12{stage_imm_val[11]}}, stage_imm_val};
+    wire [23:0] imm_unsigned= {12'b0, stage_imm_val};
+
     always @* begin
-        operand       = stage_imm_en ? ir_reg : src_data_in;
+        if (stage_imm_en) begin
+            if (stage_sgn_en)
+                operand = imm_signed;
+            else
+                operand = imm_unsigned;
+        end else begin
+            operand = src_data_in;
+        end
         tgt_op        = tgt_data_in;
         alu_result    = 24'b0;
         carry         = 1'b0;
@@ -196,7 +206,7 @@ module stage3ex(
             end
             `OPC_I_STi: begin
                 alu_result = tgt_op; // Address held in target register
-                store_data = ir_reg; // Immediate data
+                store_data = imm_unsigned; // Immediate data
             end
             `OPC_I_Li: begin
                 // Load immediate into the lower half of the IR
