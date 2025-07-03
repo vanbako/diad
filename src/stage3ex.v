@@ -73,12 +73,33 @@ module stage3ex(
     reg [23:0] ir_comb;
     reg [23:0] ir_reg;
 
+    wire [7:0]  opcode = instr_in[23:16];
     wire [23:0] imm_signed  = {{12{stage_imm_val[11]}}, stage_imm_val};
     wire [23:0] imm_unsigned= {12'b0, stage_imm_val};
+    wire [23:0] imm_full    = {ir_reg[23:12], stage_imm_val};
+    wire        use_full_imm = (opcode == `OPC_I_MOVi)  ||
+                               (opcode == `OPC_IS_MOVis) ||
+                               (opcode == `OPC_I_ADDi) ||
+                               (opcode == `OPC_IS_ADDis)||
+                               (opcode == `OPC_I_SUBi) ||
+                               (opcode == `OPC_IS_SUBis)||
+                               (opcode == `OPC_I_ANDi) ||
+                               (opcode == `OPC_I_ORi)  ||
+                               (opcode == `OPC_I_XORi) ||
+                               (opcode == `OPC_I_SLi)  ||
+                               (opcode == `OPC_I_SRi)  ||
+                               (opcode == `OPC_IS_SRis)||
+                               (opcode == `OPC_I_CMPi) ||
+                               (opcode == `OPC_IS_CMPis)||
+                               (opcode == `OPC_I_LDi)  ||
+                               (opcode == `OPC_I_STi)  ||
+                               (opcode == `OPC_I_BCCi);
 
     always @* begin
         if (stage_imm_en) begin
-            if (stage_sgn_en)
+            if (use_full_imm)
+                operand = imm_full;
+            else if (stage_sgn_en)
                 operand = imm_signed;
             else
                 operand = imm_unsigned;
@@ -170,9 +191,9 @@ module stage3ex(
             end
             `OPC_I_BCCi,
             `OPC_IS_BCCis: begin
-                // Branch relative to PC using the immediate value from the
-                // decode stage.  The unsigned variant uses a zero-extended
-                // offset while the signed version sign extends the value.
+                // Branch using an immediate operand. BCCi uses the full
+                // 24-bit value from the IR register and instruction while
+                // BCCis branches relative to PC using only the lower 12 bits.
                 case (stage_bcc)
                     `BCC_RA: branch_taken = 1'b1;
                     `BCC_EQ: branch_taken =  flags_in[`FLAG_Z];
@@ -187,7 +208,7 @@ module stage3ex(
                 endcase
                 if (branch_taken) begin
                     if (instr_in[23:16] == `OPC_I_BCCi)
-                        alu_result = pc_in + {12'b0, stage_imm_val};
+                        alu_result = imm_full;
                     else
                         alu_result = pc_in + {{12{stage_imm_val[11]}}, stage_imm_val};
                 end else begin
@@ -198,7 +219,8 @@ module stage3ex(
                 alu_result = src_data_in; // Placeholder load behaviour
             end
             `OPC_I_LDi: begin
-                alu_result = src_data_in; // Placeholder immediate load behaviour
+                // Address comes from the full immediate value
+                alu_result = imm_full;
             end
             `OPC_R_ST: begin
                 alu_result = tgt_op; // Address held in target register
@@ -206,7 +228,7 @@ module stage3ex(
             end
             `OPC_I_STi: begin
                 alu_result = tgt_op; // Address held in target register
-                store_data = imm_unsigned; // Immediate data
+                store_data = imm_full; // Immediate data
             end
             `OPC_S_LUI: begin
                 // Load immediate into the upper half of the IR
