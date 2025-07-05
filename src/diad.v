@@ -74,6 +74,9 @@ module diad(
     // Combined stall control used by the decode stage and PC logic
     wire stall_signal = branch_stall || hazard_stall;
 
+    // Halt flag asserted when the HLT instruction reaches the execute stage
+    reg halted;
+
     // Hold the stall for a single cycle after a branch reaches the
     // execute stage.
     always @(posedge clk or posedge rst) begin
@@ -84,6 +87,15 @@ module diad(
             branch_stall <= ex_is_branch;
             if (ex_is_branch)
                 branch_pc <= ex_result;
+        end
+    end
+
+    // Latch halt when a HLT instruction reaches the execute stage
+    always @(posedge clk or posedge rst) begin
+        if (rst) begin
+            halted <= 1'b0;
+        end else if (ex_halt) begin
+            halted <= 1'b1;
         end
     end
 
@@ -110,6 +122,7 @@ module diad(
     wire [23:0] ex_store_data;
     wire [3:0]  ex_flags;
     wire        ex_branch_taken;
+    wire        ex_halt;
     wire [23:0] ma_result;
     wire [23:0] ma_store_data;
     wire [3:0]  ma_flags;
@@ -132,12 +145,21 @@ module diad(
         if (branch_stall) begin
             // Use the resolved branch address when stalling
             ia_pc <= branch_pc;
-        end else if (stage1ia_en) begin
+        end else if (stage1ia_en && !halted) begin
             // Default sequential increment
             ia_pc <= ia_pc + 24'd1;
         end
         if (rst) begin
             ia_pc       <= 24'b0;
+            stage1ia_en <= 1'b0;
+            stage1if_en <= 1'b0;
+            stage2id_en <= 1'b0;
+            stage3ex_en <= 1'b0;
+            stage4ma_en <= 1'b0;
+            stage4mo_en <= 1'b0;
+            stage5ra_en <= 1'b0;
+            stage5ro_en <= 1'b0;
+        end else if (halted) begin
             stage1ia_en <= 1'b0;
             stage1if_en <= 1'b0;
             stage2id_en <= 1'b0;
@@ -285,7 +307,8 @@ module diad(
         .result_out(ex_result),
         .flags_out(ex_flags),
         .store_data_out(ex_store_data),
-        .branch_taken_out(ex_branch_taken)
+        .branch_taken_out(ex_branch_taken),
+        .halt_out(ex_halt)
     );
 
     // Memory address stage
