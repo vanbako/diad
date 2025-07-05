@@ -39,13 +39,16 @@ module stage3ex(
     // Data value for store instructions
     output wire [23:0] store_data_out,
     // Asserted when a branch condition is met
-    output wire        branch_taken_out
+    output wire        branch_taken_out,
+    // Asserted for a single cycle when a HLT instruction enters this stage
+    output wire        halt_out
 );
     // Propagate the enable signal to the next stage.  For the special
     // halt instruction the pipeline is stalled by clearing the enable
     // line.
     // Halt instructions reside in the upper opcode byte
     assign enable_out = (instr_in[23:16] == `OPC_S_HLT) ? 1'b0 : enable_in;
+    assign halt_out   = enable_in && (instr_in[23:16] == `OPC_S_HLT);
 
     // Stage output prior to latching.  This is kept as a separate wire so
     // that future execute logic can easily be inserted here.

@@ -94,7 +94,7 @@ module diad(
     always @(posedge clk or posedge rst) begin
         if (rst) begin
             halted <= 1'b0;
-        end else if ((idex_instr[23:16] == `OPC_S_HLT) && stage3ex_en) begin
+        end else if (ex_halt) begin
             halted <= 1'b1;
         end
     end
@@ -122,6 +122,7 @@ module diad(
     wire [23:0] ex_store_data;
     wire [3:0]  ex_flags;
     wire        ex_branch_taken;
+    wire        ex_halt;
     wire [23:0] ma_result;
     wire [23:0] ma_store_data;
     wire [3:0]  ma_flags;
@@ -306,7 +307,8 @@ module diad(
         .result_out(ex_result),
         .flags_out(ex_flags),
         .store_data_out(ex_store_data),
-        .branch_taken_out(ex_branch_taken)
+        .branch_taken_out(ex_branch_taken),
+        .halt_out(ex_halt)
     );
 
     // Memory address stage
