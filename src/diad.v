@@ -145,8 +145,10 @@ module diad(
         if (branch_stall) begin
             // Use the resolved branch address when stalling
             ia_pc <= branch_pc;
-        end else if (stage1ia_en && !halted) begin
-            // Default sequential increment
+        end else if (stage1ia_en && !(halted || ex_halt)) begin
+            // Default sequential increment.  When a HLT instruction reaches the
+            // execute stage (ex_halt) stop advancing the PC so it remains on the
+            // halt instruction.
             ia_pc <= ia_pc + 24'd1;
         end
         if (rst) begin
@@ -159,7 +161,7 @@ module diad(
             stage4mo_en <= 1'b0;
             stage5ra_en <= 1'b0;
             stage5ro_en <= 1'b0;
-        end else if (halted) begin
+        end else if (ex_halt || halted) begin
             stage1ia_en <= 1'b0;
             stage1if_en <= 1'b0;
             stage2id_en <= 1'b0;
