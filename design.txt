@@ -5,7 +5,7 @@ Toolchain is Vivado Lab Edition 2024.2, language verilog
 
 - Details
 FPGA: Artix-7, Board: Basys 3
-instructions, all memories, (GP) general purpose registers, (SSP) shadow stack pointer, (LR) link register, (PC) program counter are diad (24 bit) in size
+instructions, all memories, (GP) general purpose registers, (SSP) shadow stack pointer, (LR) link register, (PC) program counter, (IR) immediate register are diad (24 bit) in size
 floating points are not needed yet. They are for future extension
 no branch prediction, no out-of-order execution, no speculative execution, no interrupts, no exceptions, no cache, no TLB, no MMU
 no instruction set architecture yet, only microarchitecture
@@ -26,7 +26,7 @@ Asynchronous Resets using the Artix-7 flip-flops to bring it in the clock domain
 [15-12] TGT target special register (0 = PC, 1 = LR, 2 = IR, 3 = SSP)
 [11-8]  SRC source general purpose register (16x GP)
 [11-8]  SRC source special register (0 = PC, 1 = LR, 2 = IR, 3 = SSP)
-[11-0]  IMM immediate value (12 bit)
+[11-0]  IMM immediate value (12 bit) (goes to upper 12 bits of IR with the LUI instruction, lower 12 bits for all other instructions)
 unused for the instruction:
 [x-y]   RSV reserved, must be all 0 (for the moment not checked, a check must be implemented when implementing interrupts where it should generate an illegal instruction interrupt if RSV bits are not 0)
 
@@ -37,50 +37,51 @@ Branch condition codes use some of the same bits as TGT, as TGT is not used in b
 
 i after the instruction means immediate value (upper from IR and lower from IMM)
 s after the instruction means signed operation
-is after the instruction means signed immediate operation (only lower from IMM)
+is after the instruction means signed immediate operation (upper from IR and lower from IMM)
 
 In the assembly language, first operand is source, second operand is target.
+
+The move full immediate below is used as the upper immediate from IR and the lower immediate from the instruction IMM.
 
 NOP (no operation)
 HLT (halt)
 LUI #imm (load upper immediate)
 MOV Rs, Rt (move)
-MOVi Rt (move immediate)
-MOVis Rt (move immediate sign-extend)
+MOVi #imm, Rt (move full immediate)
 ADD Rs, Rt (add)
-ADDi Rt (add immediate)
+ADDi #imm, Rt (add full immediate)
 ADDs Rs, Rt	(add signed)
-ADDis Rt (add signed immediate)
+ADDis #imm, Rt (add full immediate signed)
 SUB Rs, Rt (subtract)
-SUBi Rt (subtract immediate)
+SUBi #imm, Rt (subtract full immediate)
 SUBs Rs, Rt	(subtract signed)
-SUBis Rt (subtract signed immediate)
+SUBis #imm, Rt (subtract full immediate)
 NOT Rt (bitwise not)
 AND Rs, Rt (bitwise and)
-ANDi Rt (bitwise and immediate)
+ANDi #imm, Rt (bitwise and full immediate)
 OR Rs, Rt (bitwise or)
-ORi Rt (bitwise or immediate)
+ORi #imm, Rt (bitwise or full immediate)
 XOR Rs, Rt (bitwise xor)
-XORi Rt (bitwise xor immediate)
+XORi #imm, Rt (bitwise xor full immediate)
 SL Rs, Rt (shift left)
-SLi Rt (shift left immediate)
+SLi #imm, Rt (shift left immediate, only lower 5 bits of the immediate are used)
 SR Rs, Rt (shift right)
-SRi Rt (shift right immediate)
+SRi #imm, Rt (shift right immediate, only lower 5 bits of the immediate are used)
 SRs Rs, Rt (shift right signed)
-SRis Rt (shift right signed immediate)
+SRis #imm, Rt (shift right signed immediate, only lower 5 bits of the immediate are used)
 CMP Rs, Rt (compare)
-CMPi Rt (compare immediate)
+CMPi #imm, Rt (compare full immediate)
 CMPs Rs, Rt (compare signed)
-CMPis Rt (compare signed immediate)
-BCC Rs (branch condition code) (branch if condition is met)
-BCCi (branch condition code immediate) (branch if condition is met)
-BCCis (branch condition code immediate signed) (branch if condition is met)
+CMPis #imm, Rt (compare signed full immediate)
+BCC Rs (branch condition code, absolute address) (branch if condition is met)
+BCCi #imm (branch condition code full immediate, absolute address) (branch if condition is met)
+BCCis #imm (branch condition code immediate signed, relative to pc only lower 12 bits of immediate) (branch if condition is met)
 LD (Rs), Rt (load from data memory)
-LDi Rt (load from data memory, immediate address)
-ST Rs, (Rt) (store to data memory)
-STi (Rt) (store immediate to data memory)
+LDi (imm), Rt (load from data memory, full immediate address)
+ST Rs, (Rt) (store Rs to data memory at address in Rt)
+STi #imm, (Rt) (store full immediate to data memory at address in Rt)
 SRMOV PC, LR (store pc in link register)
-SRBCC LR+#imm (branch condition code to link register with immediatee) (branch if condition is met)
+SRBCC LR+#imm (branch condition code to link register with immediate, only lower 12 bits of immediate are used) (branch if condition is met)
 
 - Pipeline Stages
 1. IA/IF: Instruction Address & Fetch
@@ -118,7 +119,7 @@ data:
 
 - modules
 testbench
-henad
+diad
 	reggp
 	regflag
 	reglr

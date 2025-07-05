@@ -1,6 +1,6 @@
 # Diad RISC Core
 
-Diad is an experimental 24-bit RISC microarchitecture. It features a simple five-stage pipeline that now includes full instruction decode, execution and memory access. Earlier revisions merely passed the program counter through each stage; the current design adds a register file, branch handling and basic hazard detection so a small program can run end-to-end.
+Diad is an experimental 24-bit RISC microarchitecture. It features a simple five-stage pipeline that now includes full instruction decode, execution and memory access. The current design adds a register file, branch handling and basic hazard detection so a small program can run end-to-end.
 
 The overall architecture and instruction format are documented in `design.txt`.
 
@@ -11,7 +11,7 @@ src/        Verilog source files for the core and its pipeline stages
 LICENSE     GPLv3 license text
 ```
 
-Key pipeline stages are defined in `src/henad.v`:
+Key pipeline stages are defined in `src/diad.v`:
 
 ```
 1. IA/IF – Instruction Address & Fetch
@@ -20,8 +20,6 @@ Key pipeline stages are defined in `src/henad.v`:
 4. MA/MO – Memory Address & Operation
 5. RA/RO – Register Address & Operation
 ```
-
-A list of planned modules and memories can be found starting at line 120 of `design.txt`.
 
 ## Building and simulation
 
