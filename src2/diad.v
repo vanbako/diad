@@ -1,0 +1,118 @@
+`include "src2/sizes.vh"
+
+module diad(
+    input wire iw_clk,
+    input wire iw_rst
+);
+    reg  [`HBIT_ADDR:0] r_ia_pc;
+    wire [`HBIT_ADDR:0] w_iaif_pc;
+    wire [`HBIT_ADDR:0] w_ifid_pc;
+    wire [`HBIT_ADDR:0] w_idex_pc;
+    wire [`HBIT_ADDR:0] w_exma_pc;
+    wire [`HBIT_ADDR:0] w_mamo_pc;
+    wire [`HBIT_ADDR:0] w_mora_pc;
+    wire [`HBIT_ADDR:0] w_raro_pc;
+    wire [`HBIT_ADDR:0] w_ro_pc;
+
+    wire [`HBIT_DATA:0] w_ifid_instr;
+    wire [`HBIT_DATA:0] w_idex_instr;
+    wire [`HBIT_DATA:0] w_exma_instr;
+    wire [`HBIT_DATA:0] w_mamo_instr;
+    wire [`HBIT_DATA:0] w_mora_instr;
+    wire [`HBIT_DATA:0] w_raro_instr;
+    wire [`HBIT_DATA:0] w_ro_instr;
+
+    always @(posedge iw_clk or posedge iw_rst) begin
+        if (iw_rst) begin
+            r_ia_pc <= `SIZE_ADDR'b0;
+        end
+        else begin
+            r_ia_pc <= r_ia_pc + `SIZE_ADDR'd1;
+        end
+    end
+
+    wire                w_mem_we;
+    wire [`HBIT_ADDR:0] w_mem_addr;
+    wire [`HBIT_DATA:0] w_mem_wdata;
+    wire [`HBIT_DATA:0] w_mem_rdata;
+
+    mem u_mem(
+        .iw_clk  (w_clk),
+        .iw_we   (w_mem_we),
+        .iw_addr (w_mem_addr),
+        .iw_wdata(w_mem_wdata),
+        .or_rdata(w_mem_rdata)
+    );
+
+    stg1ia u_stg1ia(
+        .iw_clk     (w_clk),
+        .iw_rst     (w_rst),
+        .ow_mem_addr(w_mem_addr),
+        .iw_pc      (r_ia_pc),
+        .ow_pc      (w_iaif_pc)
+    );
+
+    stg1if u_stg1if(
+        .iw_clk     (w_clk),
+        .iw_rst     (w_rst),
+        .iw_mem_data(w_mem_rdata),
+        .iw_pc      (w_iaif_pc),
+        .ow_pc      (w_ifid_pc),
+        .ow_instr   (w_ifid_instr)
+    );
+
+    stg2id u_stg2id(
+        .iw_clk  (w_clk),
+        .iw_rst  (w_rst),
+        .iw_pc   (w_ifid_pc),
+        .ow_pc   (w_idex_pc),
+        .iw_instr(w_ifid_instr),
+        .ow_instr(w_idex_instr)
+    );
+
+    stg3ex u_stg3ex(
+        .w_clk      (w_clk),
+        .w_rst      (w_rst),
+        .w_pc_in    (w_idex_pc),
+        .r_pc_out   (w_exma_pc),
+        .w_instr_in (w_idex_instr),
+        .r_instr_out(w_exma_instr)
+    );
+
+    stg4ma u_stg4ma(
+        .w_clk      (w_clk),
+        .w_rst      (w_rst),
+        .w_pc_in    (w_exma_pc),
+        .r_pc_out   (w_mamo_pc),
+        .w_instr_in (w_exma_instr),
+        .r_instr_out(w_mamo_instr)
+    );
+
+    stg4mo u_stg4mo(
+        .w_clk      (w_clk),
+        .w_rst      (w_rst),
+        .w_pc_in    (w_mamo_pc),
+        .r_pc_out   (w_mora_pc),
+        .w_instr_in (w_mamo_instr),
+        .r_instr_out(w_mora_instr)
+    );
+
+    stg5ra u_stg5ra(
+        .w_clk      (w_clk),
+        .w_rst      (w_rst),
+        .w_pc_in    (w_mora_pc),
+        .r_pc_out   (w_raro_pc),
+        .w_instr_in (w_mora_instr),
+        .r_instr_out(w_raro_instr)
+    );
+
+    stg5ro u_stg5ro(
+        .w_clk      (w_clk),
+        .w_rst      (w_rst),
+        .w_pc_in    (w_raro_pc),
+        .r_pc_out   (w_ro_pc),
+        .w_instr_in (w_raro_instr),
+        .r_instr_out(w_ro_instr)
+    );
+
+endmodule
