@@ -8,6 +8,12 @@ module mem(
     output reg [`HBIT_DATA:0] or_rdata
 );
     reg [`HBIT_DATA:0] r_mem [0:4095];
+    initial begin
+        integer i;
+        for (i = 0; i < 4096; i = i + 1)
+            r_mem[i] = 24'b0;
+        $readmemh("mem_init2.hex", r_mem);
+    end
     always @(posedge iw_clk) begin
         if (iw_we) r_mem[iw_addr] <= iw_wdata;
         or_rdata <= r_mem[iw_addr];

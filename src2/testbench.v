@@ -11,7 +11,7 @@ module testbench;
     always #5 r_clk = ~r_clk;
     initial begin
         r_rst = 1'b1;
-        #20;
+        #10;
         r_rst = 1'b0;
         repeat (20) @(posedge r_clk);
         $finish;

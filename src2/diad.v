@@ -4,6 +4,7 @@ module diad(
     input wire iw_clk,
     input wire iw_rst
 );
+    reg                 r_ia_valid;
     reg  [`HBIT_ADDR:0] r_ia_pc;
     wire [`HBIT_ADDR:0] w_iaif_pc;
     wire [`HBIT_ADDR:0] w_ifid_pc;
@@ -24,10 +25,10 @@ module diad(
 
     always @(posedge iw_clk or posedge iw_rst) begin
         if (iw_rst) begin
-            r_ia_pc <= `SIZE_ADDR'b0;
+            r_ia_pc    <= `SIZE_ADDR'b0;
         end
         else begin
-            r_ia_pc <= r_ia_pc + `SIZE_ADDR'd1;
+            r_ia_pc    <= r_ia_pc + `SIZE_ADDR'd1;
         end
     end
 
@@ -49,13 +50,15 @@ module diad(
         .iw_rst     (iw_rst),
         .ow_mem_addr(w_mem_addr),
         .iw_pc      (r_ia_pc),
-        .ow_pc      (w_iaif_pc)
+        .ow_pc      (w_iaif_pc),
+        .ow_ia_valid(r_ia_valid)
     );
 
     stg1if u_stg1if(
         .iw_clk     (iw_clk),
         .iw_rst     (iw_rst),
         .iw_mem_data(w_mem_rdata),
+        .iw_ia_valid(r_ia_valid),
         .iw_pc      (w_iaif_pc),
         .ow_pc      (w_ifid_pc),
         .ow_instr   (w_ifid_instr)
