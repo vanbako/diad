@@ -37,7 +37,7 @@ module diad(
     wire [`HBIT_DATA:0] w_mem_rdata;
 
     mem u_mem(
-        .iw_clk  (w_clk),
+        .iw_clk  (iw_clk),
         .iw_we   (w_mem_we),
         .iw_addr (w_mem_addr),
         .iw_wdata(w_mem_wdata),
@@ -45,16 +45,16 @@ module diad(
     );
 
     stg1ia u_stg1ia(
-        .iw_clk     (w_clk),
-        .iw_rst     (w_rst),
+        .iw_clk     (iw_clk),
+        .iw_rst     (iw_rst),
         .ow_mem_addr(w_mem_addr),
         .iw_pc      (r_ia_pc),
         .ow_pc      (w_iaif_pc)
     );
 
     stg1if u_stg1if(
-        .iw_clk     (w_clk),
-        .iw_rst     (w_rst),
+        .iw_clk     (iw_clk),
+        .iw_rst     (iw_rst),
         .iw_mem_data(w_mem_rdata),
         .iw_pc      (w_iaif_pc),
         .ow_pc      (w_ifid_pc),
@@ -62,8 +62,8 @@ module diad(
     );
 
     stg2id u_stg2id(
-        .iw_clk  (w_clk),
-        .iw_rst  (w_rst),
+        .iw_clk  (iw_clk),
+        .iw_rst  (iw_rst),
         .iw_pc   (w_ifid_pc),
         .ow_pc   (w_idex_pc),
         .iw_instr(w_ifid_instr),
@@ -71,48 +71,47 @@ module diad(
     );
 
     stg3ex u_stg3ex(
-        .w_clk      (w_clk),
-        .w_rst      (w_rst),
-        .w_pc_in    (w_idex_pc),
-        .r_pc_out   (w_exma_pc),
-        .w_instr_in (w_idex_instr),
-        .r_instr_out(w_exma_instr)
+        .iw_clk  (iw_clk),
+        .iw_rst  (iw_rst),
+        .iw_pc   (w_idex_pc),
+        .ow_pc   (w_exma_pc),
+        .iw_instr(w_idex_instr),
+        .ow_instr(w_exma_instr)
     );
 
     stg4ma u_stg4ma(
-        .w_clk      (w_clk),
-        .w_rst      (w_rst),
-        .w_pc_in    (w_exma_pc),
-        .r_pc_out   (w_mamo_pc),
-        .w_instr_in (w_exma_instr),
-        .r_instr_out(w_mamo_instr)
+        .iw_clk  (iw_clk),
+        .iw_rst  (iw_rst),
+        .iw_pc   (w_exma_pc),
+        .ow_pc   (w_mamo_pc),
+        .iw_instr(w_exma_instr),
+        .ow_instr(w_mamo_instr)
     );
 
     stg4mo u_stg4mo(
-        .w_clk      (w_clk),
-        .w_rst      (w_rst),
-        .w_pc_in    (w_mamo_pc),
-        .r_pc_out   (w_mora_pc),
-        .w_instr_in (w_mamo_instr),
-        .r_instr_out(w_mora_instr)
+        .iw_clk  (iw_clk),
+        .iw_rst  (iw_rst),
+        .iw_pc   (w_mamo_pc),
+        .ow_pc   (w_mora_pc),
+        .iw_instr(w_mamo_instr),
+        .ow_instr(w_mora_instr)
     );
 
     stg5ra u_stg5ra(
-        .w_clk      (w_clk),
-        .w_rst      (w_rst),
-        .w_pc_in    (w_mora_pc),
-        .r_pc_out   (w_raro_pc),
-        .w_instr_in (w_mora_instr),
-        .r_instr_out(w_raro_instr)
+        .iw_clk  (iw_clk),
+        .iw_rst  (iw_rst),
+        .iw_pc   (w_mora_pc),
+        .ow_pc   (w_raro_pc),
+        .iw_instr(w_mora_instr),
+        .ow_instr(w_raro_instr)
     );
 
     stg5ro u_stg5ro(
-        .w_clk      (w_clk),
-        .w_rst      (w_rst),
-        .w_pc_in    (w_raro_pc),
-        .r_pc_out   (w_ro_pc),
-        .w_instr_in (w_raro_instr),
-        .r_instr_out(w_ro_instr)
+        .iw_clk  (iw_clk),
+        .iw_rst  (iw_rst),
+        .iw_pc   (w_raro_pc),
+        .ow_pc   (w_ro_pc),
+        .iw_instr(w_raro_instr),
+        .ow_instr(w_ro_instr)
     );
-
 endmodule
