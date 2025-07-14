@@ -48,11 +48,56 @@ module stg3ex(
             `OPC_R_XOR: begin
                 r_result = iw_gp[iw_src_gp] ^ iw_gp[iw_tgt_gp];
             end
+            `OPC_R_SHL: begin
+                r_result = iw_gp[iw_tgt_gp] << iw_gp[iw_src_gp][4:0];
+            end
+            `OPC_R_SHR: begin
+                r_result = iw_gp[iw_tgt_gp] >> iw_gp[iw_src_gp][4:0];
+            end
+            `OPC_RS_ADDs: begin
+                r_result = $signed(iw_gp[iw_src_gp]) + $signed(iw_gp[iw_tgt_gp]);
+            end
+            `OPC_RS_SUBs: begin
+                r_result = $signed(iw_gp[iw_src_gp]) - $signed(iw_gp[iw_tgt_gp]);
+            end
+            `OPC_RS_SHRs: begin
+                r_result = $signed(iw_gp[iw_tgt_gp]) >>> iw_gp[iw_src_gp][4:0];
+            end
             `OPC_I_MOVi: begin
                 r_result = {r_ui, iw_imm_val};
             end
+            `OPC_I_ADDi: begin
+                r_result = iw_gp[iw_src_gp] + {r_ui, iw_imm_val};
+            end
+            `OPC_I_SUBi: begin
+                r_result = iw_gp[iw_src_gp] - {r_ui, iw_imm_val};
+            end
+            `OPC_I_ANDi: begin
+                r_result = iw_gp[iw_src_gp] & {r_ui, iw_imm_val};
+            end
+            `OPC_I_ORi: begin
+                r_result = iw_gp[iw_src_gp] | {r_ui, iw_imm_val};
+            end
+            `OPC_I_XORi: begin
+                r_result = iw_gp[iw_src_gp] ^ {r_ui, iw_imm_val};
+            end
+            `OPC_I_SHLi: begin
+                r_result = iw_gp[iw_src_gp] << iw_imm_val[4:0];
+            end
+            `OPC_I_SHRi: begin
+                r_result = iw_gp[iw_src_gp] >> iw_imm_val[4:0];
+            end
             `OPC_IS_MOVis: begin
                 r_result = {{12{iw_imm_val[`HBIT_IMM]}}, iw_imm_val};
+            end
+            `OPC_IS_ADDis: begin
+                r_result = iw_gp[iw_src_gp] + iw_imm_val;
+            end
+            `OPC_IS_SUBis: begin
+                r_result = iw_gp[iw_src_gp] - iw_imm_val;
+            end
+            `OPC_IS_SHRis: begin
+                r_result = $signed(iw_gp[iw_src_gp]) >> iw_imm_val[4:0];
             end
             `OPC_S_LUI: begin
                 r_ui = iw_imm_val;
