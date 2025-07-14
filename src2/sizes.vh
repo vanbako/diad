@@ -4,6 +4,15 @@
 `define SIZE_ADDR 24
 `define SIZE_DATA 24
 
+`define SIZE_OPC     8
+`define SIZE_CC      4
+`define SIZE_IMM    12
+`define SIZE_IMMSR   8
+`define SIZE_TGT_GP  4
+`define SIZE_TGT_SR  4
+`define SIZE_SRC_GP  4
+`define SIZE_SRC_SR  4
+
 `define HBIT_ADDR 23
 `define HBIT_DATA 23
 
