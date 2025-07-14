@@ -2,6 +2,8 @@
 
 `include "src2/opcodes.vh"
 `include "src2/cc.vh"
+`include "src2/sizes.vh"
+`include "src2/sr.vh"
 
 module testbench;
     reg r_clk;
@@ -22,28 +24,26 @@ module testbench;
     integer tick = 0;
     always @(posedge r_clk) begin
 `ifdef DEBUGPC
-        $display("tick %03d : rst=%b PC  IA=%h IAIF=%h IFID=%h IDEX=%h EXMA=%h MAMO=%h MORA=%h RARO=%h RO=%h",
+        $display("tick %03d : rst=%b PC  IA=%h IAIF=%h IFID=%h IDEX=%h EXMA=%h MAMO=%h MOWB=%h WB=%h",
                  tick, r_rst,
-                 u_diad.r_ia_pc,
+                 u_diad.r_sr[`INDEX_PC],
                  u_diad.w_iaif_pc,
                  u_diad.w_ifid_pc,
                  u_diad.w_idex_pc,
                  u_diad.w_exma_pc,
                  u_diad.w_mamo_pc,
-                 u_diad.w_mora_pc,
-                 u_diad.w_raro_pc,
-                 u_diad.w_ro_pc);
+                 u_diad.w_mowb_pc,
+                 u_diad.w_wb_pc);
 `endif
 `ifdef DEBUGINSTR
-        $display("tick %03d : rst=%b INSTR                     IFID=%h IDEX=%h EXMA=%h MAMO=%h MORA=%h RARO=%h RO=%h",
+        $display("tick %03d : rst=%b INSTR                     IFID=%h IDEX=%h EXMA=%h MAMO=%h MOWB=%h WB=%h",
                  tick, r_rst,
                  u_diad.w_ifid_instr,
                  u_diad.w_idex_instr,
                  u_diad.w_exma_instr,
                  u_diad.w_mamo_instr,
-                 u_diad.w_mora_instr,
-                 u_diad.w_raro_instr,
-                 u_diad.w_ro_instr);
+                 u_diad.w_mowb_instr,
+                 u_diad.w_wb_instr);
 `endif
 `ifdef DEBUGDECODE
         $display("tick %03d : rst=%b DECODE OPC=%-8s SGN_EN=%b IMM_EN=%b IMM_VAL=%h IMMSR_VAL=%h CC=%2s TGT_GP=%h TGT_SR=%h SRC_GP=%h SRC_SR=%h",

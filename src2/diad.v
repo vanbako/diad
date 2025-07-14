@@ -27,17 +27,15 @@ module diad(
     wire [`HBIT_ADDR:0] w_idex_pc;
     wire [`HBIT_ADDR:0] w_exma_pc;
     wire [`HBIT_ADDR:0] w_mamo_pc;
-    wire [`HBIT_ADDR:0] w_mora_pc;
-    wire [`HBIT_ADDR:0] w_raro_pc;
-    wire [`HBIT_ADDR:0] w_ro_pc;
+    wire [`HBIT_ADDR:0] w_mowb_pc;
+    wire [`HBIT_ADDR:0] w_wb_pc;
 
     wire [`HBIT_DATA:0] w_ifid_instr;
     wire [`HBIT_DATA:0] w_idex_instr;
     wire [`HBIT_DATA:0] w_exma_instr;
     wire [`HBIT_DATA:0] w_mamo_instr;
-    wire [`HBIT_DATA:0] w_mora_instr;
-    wire [`HBIT_DATA:0] w_raro_instr;
-    wire [`HBIT_DATA:0] w_ro_instr;
+    wire [`HBIT_DATA:0] w_mowb_instr;
+    wire [`HBIT_DATA:0] w_wb_instr;
 
     integer i;
     always @(posedge iw_clk or posedge iw_rst) begin
@@ -138,26 +136,17 @@ module diad(
         .iw_clk  (iw_clk),
         .iw_rst  (iw_rst),
         .iw_pc   (w_mamo_pc),
-        .ow_pc   (w_mora_pc),
+        .ow_pc   (w_mowb_pc),
         .iw_instr(w_mamo_instr),
-        .ow_instr(w_mora_instr)
+        .ow_instr(w_mowb_instr)
     );
 
-    stg5ra u_stg5ra(
+    stg5wb u_stg5wb(
         .iw_clk  (iw_clk),
         .iw_rst  (iw_rst),
-        .iw_pc   (w_mora_pc),
-        .ow_pc   (w_raro_pc),
-        .iw_instr(w_mora_instr),
-        .ow_instr(w_raro_instr)
-    );
-
-    stg5ro u_stg5ro(
-        .iw_clk  (iw_clk),
-        .iw_rst  (iw_rst),
-        .iw_pc   (w_raro_pc),
-        .ow_pc   (w_ro_pc),
-        .iw_instr(w_raro_instr),
-        .ow_instr(w_ro_instr)
+        .iw_pc   (w_mowb_pc),
+        .ow_pc   (w_wb_pc),
+        .iw_instr(w_mowb_instr),
+        .ow_instr(w_wb_instr)
     );
 endmodule
