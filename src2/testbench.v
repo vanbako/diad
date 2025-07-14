@@ -45,6 +45,24 @@ module testbench;
                  u_diad.w_mowb_instr,
                  u_diad.w_wb_instr);
 `endif
+`ifdef DEBUGOPC
+        $display("tick %03d : rst=%b OPC                                   IDEX=%h     EXMA=%h     MAMO=%h     MOWB=%h     WB=%h",
+                 tick, r_rst,
+                 u_diad.w_opc,
+                 u_diad.w_exma_opc,
+                 u_diad.w_mamo_opc,
+                 u_diad.w_mowb_opc,
+                 u_diad.w_wb_opc);
+`endif
+`ifdef DEBUGTGT_GP
+        $display("tick %03d : rst=%b TGT_GP                                IDEX=%h      EXMA=%h      MAMO=%h      MOWB=%h      WB=%h",
+                 tick, r_rst,
+                 u_diad.w_tgt_gp,
+                 u_diad.w_exma_tgt_gp,
+                 u_diad.w_mamo_tgt_gp,
+                 u_diad.w_mowb_tgt_gp,
+                 u_diad.w_wb_tgt_gp);
+`endif
 `ifdef DEBUGDECODE
         $display("tick %03d : rst=%b DECODE OPC=%-8s SGN_EN=%b IMM_EN=%b IMM_VAL=%h IMMSR_VAL=%h CC=%2s TGT_GP=%h TGT_SR=%h SRC_GP=%h SRC_SR=%h",
                  tick, r_rst,

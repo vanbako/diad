@@ -99,7 +99,10 @@ module diad(
         .ow_src_sr   (w_src_sr)
     );
 
-    wire [`HBIT_DATA:0] w_exma_result;
+    wire [`HBIT_OPC:0]    w_exma_opc;
+    wire [`HBIT_TGT_GP:0] w_exma_tgt_gp;
+    wire [`HBIT_TGT_SR:0] w_exma_tgt_sr;
+    wire [`HBIT_DATA:0]   w_exma_result;
 
     stg3ex u_stg3ex(
         .iw_clk      (iw_clk),
@@ -109,13 +112,16 @@ module diad(
         .iw_instr    (w_idex_instr),
         .ow_instr    (w_exma_instr),
         .iw_opc      (w_opc),
+        .ow_opc      (w_exma_opc),
         .iw_sgn_en   (w_sgn_en),
         .iw_imm_en   (w_imm_en),
         .iw_imm_val  (w_imm_val),
         .iw_immsr_val(w_immsr_val),
         .iw_cc       (w_cc),
         .iw_tgt_gp   (w_tgt_gp),
+        .ow_tgt_gp   (w_exma_tgt_gp),
         .iw_tgt_sr   (w_tgt_sr),
+        .ow_tgt_sr   (w_exma_tgt_sr),
         .iw_src_gp   (w_src_gp),
         .iw_src_sr   (w_src_sr),
         .iw_gp       (r_gp),
@@ -123,32 +129,71 @@ module diad(
         .ow_result   (w_exma_result)
     );
 
+    wire [`HBIT_OPC:0]    w_mamo_opc;
+    wire [`HBIT_TGT_GP:0] w_mamo_tgt_gp;
+    wire [`HBIT_TGT_SR:0] w_mamo_tgt_sr;
+    wire [`HBIT_DATA:0]   w_mamo_result;
+
     stg4ma u_stg4ma(
-        .iw_clk  (iw_clk),
-        .iw_rst  (iw_rst),
-        .iw_pc   (w_exma_pc),
-        .ow_pc   (w_mamo_pc),
-        .iw_instr(w_exma_instr),
-        .ow_instr(w_mamo_instr)
+        .iw_clk   (iw_clk),
+        .iw_rst   (iw_rst),
+        .iw_pc    (w_exma_pc),
+        .ow_pc    (w_mamo_pc),
+        .iw_instr (w_exma_instr),
+        .ow_instr (w_mamo_instr),
+        .iw_opc   (w_exma_opc),
+        .ow_opc   (w_mamo_opc),
+        .iw_tgt_gp(w_exma_tgt_gp),
+        .ow_tgt_gp(w_mamo_tgt_gp),
+        .iw_tgt_sr(w_exma_tgt_sr),
+        .ow_tgt_sr(w_mamo_tgt_sr),
+        .iw_result(w_exma_result),
+        .ow_result(w_mamo_result)
     );
+
+    wire [`HBIT_OPC:0]    w_mowb_opc;
+    wire [`HBIT_TGT_GP:0] w_mowb_tgt_gp;
+    wire [`HBIT_TGT_SR:0] w_mowb_tgt_sr;
+    wire [`HBIT_DATA:0]   w_mowb_result;
 
     stg4mo u_stg4mo(
-        .iw_clk  (iw_clk),
-        .iw_rst  (iw_rst),
-        .iw_pc   (w_mamo_pc),
-        .ow_pc   (w_mowb_pc),
-        .iw_instr(w_mamo_instr),
-        .ow_instr(w_mowb_instr)
+        .iw_clk   (iw_clk),
+        .iw_rst   (iw_rst),
+        .iw_pc    (w_mamo_pc),
+        .ow_pc    (w_mowb_pc),
+        .iw_instr (w_mamo_instr),
+        .ow_instr (w_mowb_instr),
+        .iw_opc   (w_mamo_opc),
+        .ow_opc   (w_mowb_opc),
+        .iw_tgt_gp(w_mamo_tgt_gp),
+        .ow_tgt_gp(w_mowb_tgt_gp),
+        .iw_tgt_sr(w_mamo_tgt_sr),
+        .ow_tgt_sr(w_mowb_tgt_sr),
+        .iw_result(w_mamo_result),
+        .ow_result(w_mowb_result)
     );
 
+    wire [`HBIT_OPC:0]    w_wb_opc;
+    wire [`HBIT_TGT_GP:0] w_wb_tgt_gp;
+    wire [`HBIT_TGT_SR:0] w_wb_tgt_sr;
+    wire [`HBIT_DATA:0]   w_wb_result;
+
     stg5wb u_stg5wb(
-        .iw_clk  (iw_clk),
-        .iw_rst  (iw_rst),
-        .iw_pc   (w_mowb_pc),
-        .ow_pc   (w_wb_pc),
-        .iw_instr(w_mowb_instr),
-        .ow_instr(w_wb_instr),
-        .iw_gp   (r_gp),
-        .iw_sr   (r_sr)
+        .iw_clk   (iw_clk),
+        .iw_rst   (iw_rst),
+        .iw_pc    (w_mowb_pc),
+        .ow_pc    (w_wb_pc),
+        .iw_instr (w_mowb_instr),
+        .ow_instr (w_wb_instr),
+        .iw_gp    (r_gp),
+        .iw_sr    (r_sr),
+        .iw_opc   (w_mowb_opc),
+        .ow_opc   (w_wb_opc),
+        .iw_tgt_gp(w_mowb_tgt_gp),
+        .ow_tgt_gp(w_wb_tgt_gp),
+        .iw_tgt_sr(w_mowb_tgt_sr),
+        .ow_tgt_sr(w_wb_tgt_sr),
+        .iw_result(w_mowb_result),
+        .ow_result(w_wb_result)
     );
 endmodule
