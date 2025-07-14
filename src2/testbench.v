@@ -1,5 +1,8 @@
 `timescale 1ns/1ps
 
+`include "src2/opcodes.vh"
+`include "src2/cc.vh"
+
 module testbench;
     reg r_clk;
     reg r_rst;
@@ -41,6 +44,20 @@ module testbench;
                  u_diad.w_mora_instr,
                  u_diad.w_raro_instr,
                  u_diad.w_ro_instr);
+`endif
+`ifdef DEBUGDECODE
+        $display("tick %03d : rst=%b DECODE OPC=%-8s SGN_EN=%b IMM_EN=%b IMM_VAL=%h IMMSR_VAL=%h CC=%2s TGT_GP=%h TGT_SR=%h SRC_GP=%h SRC_SR=%h",
+                 tick, r_rst,
+                 opc2str(u_diad.w_opc),
+                 u_diad.w_sgn_en,
+                 u_diad.w_imm_en,
+                 u_diad.w_imm_val,
+                 u_diad.w_immsr_val,
+                 cc2str(u_diad.w_cc),
+                 u_diad.w_tgt_gp,
+                 u_diad.w_tgt_sr,
+                 u_diad.w_src_gp,
+                 u_diad.w_src_sr);
 `endif
         tick = tick + 1;
     end

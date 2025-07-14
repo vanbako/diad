@@ -1,6 +1,8 @@
 `ifndef OPCODES_VH
 `define OPCODES_VH
 
+`include "src2/sizes.vh"
+
 // OPCODE DEFINITIONS
 `define OPC_NOP      8'h00
 
@@ -53,5 +55,55 @@
 `define OPC_S_SRMOV  8'h42
 `define OPC_S_SRJCC  8'h4C
 `define OPC_S_HLT    8'h4F
+
+function automatic [79:0] opc2str;
+    input [`HBIT_OPC:0] opc;
+    begin
+        case (opc)
+            `OPC_NOP:      opc2str = "NOP";
+            `OPC_R_MOV:    opc2str = "R_MOV";
+            `OPC_R_ADD:    opc2str = "R_ADD";
+            `OPC_R_SUB:    opc2str = "R_SUB";
+            `OPC_R_NOT:    opc2str = "R_NOT";
+            `OPC_R_AND:    opc2str = "R_AND";
+            `OPC_R_OR:     opc2str = "R_OR";
+            `OPC_R_XOR:    opc2str = "R_XOR";
+            `OPC_R_SL:     opc2str = "R_SL";
+            `OPC_R_SR:     opc2str = "R_SR";
+            `OPC_R_CMP:    opc2str = "R_CMP";
+            `OPC_R_JCC:    opc2str = "R_JCC";
+            `OPC_R_BCC:    opc2str = "R_BCC";
+            `OPC_R_LD:     opc2str = "R_LD";
+            `OPC_R_ST:     opc2str = "R_ST";
+            `OPC_RS_ADDs:  opc2str = "RS_ADDs";
+            `OPC_RS_SUBs:  opc2str = "RS_SUBs";
+            `OPC_RS_SRs:   opc2str = "RS_SRs";
+            `OPC_RS_CMPs:  opc2str = "RS_CMPs";
+            `OPC_I_MOVi:   opc2str = "I_MOVi";
+            `OPC_I_ADDi:   opc2str = "I_ADDi";
+            `OPC_I_SUBi:   opc2str = "I_SUBi";
+            `OPC_I_ANDi:   opc2str = "I_ANDi";
+            `OPC_I_ORi:    opc2str = "I_ORi";
+            `OPC_I_XORi:   opc2str = "I_XORi";
+            `OPC_I_SLi:    opc2str = "I_SLi";
+            `OPC_I_SRi:    opc2str = "I_SRi";
+            `OPC_I_CMPi:   opc2str = "I_CMPi";
+            `OPC_I_JCCi:   opc2str = "I_JCCi";
+            `OPC_I_LDi:    opc2str = "I_LDi";
+            `OPC_I_STi:    opc2str = "I_STi";
+            `OPC_IS_MOVis: opc2str = "IS_MOVis";
+            `OPC_IS_ADDis: opc2str = "IS_ADDis";
+            `OPC_IS_SUBis: opc2str = "IS_SUBis";
+            `OPC_IS_SRis:  opc2str = "IS_SRis";
+            `OPC_IS_CMPis: opc2str = "IS_CMPis";
+            `OPC_IS_BCCis: opc2str = "IS_BCCis";
+            `OPC_S_LUI:    opc2str = "S_LUI";
+            `OPC_S_SRMOV:  opc2str = "S_SRMOV";
+            `OPC_S_SRJCC:  opc2str = "S_SRJCC";
+            `OPC_S_HLT:    opc2str = "S_HLT";
+            default:       opc2str = "UNKNOWN";
+        endcase
+    end
+endfunction
 
 `endif // OPCODES_VH

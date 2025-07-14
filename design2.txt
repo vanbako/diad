@@ -25,6 +25,7 @@ No memory controller yet
 [11-8]  SRC source general purpose register (16x GP)
 [11-8]  SRC source special register (0 = PC, 1 = LR, 2 = IR, 3 = SSP)
 [11-0]  IMM immediate value (12 bit) (goes to upper 12 bits of IR with the LUI instruction, lower 12 bits for all other instructions)
+[7-0]   IMMsr immediate value (8 bit) (lower 8 bits for SRJCC instruction)
 unused for the instruction:
 [x-y]   RSV reserved, must be all 0 (for the moment not checked, a check must be implemented when implementing interrupts where it should generate an illegal instruction interrupt if RSV bits are not 0)
 
@@ -80,7 +81,7 @@ LDi (imm), Rt (load from data memory, full immediate address)
 ST Rs, (Rt) (store Rs to data memory at address in Rt)
 STi #imm, (Rt) (store full immediate to data memory at address in Rt)
 SRMOV PC, LR (store pc in link register)
-SRJCC LR+#imm (jump condition code to link register with immediate, only lower 12 bits of immediate are used) (jump if condition is met)
+SRJCC LR+#imm (jump condition code to link register with immediate, only lower 8 bits of immediate are used) (jump if condition is met)
 
 - Pipeline Stages
 1. IA/IF: Instruction Address & Fetch

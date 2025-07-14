@@ -4,7 +4,20 @@ module diad(
     input wire iw_clk,
     input wire iw_rst
 );
-    reg                 r_ia_valid;
+    wire                w_mem_we;
+    wire [`HBIT_ADDR:0] w_mem_addr;
+    wire [`HBIT_DATA:0] w_mem_wdata;
+    wire [`HBIT_DATA:0] w_mem_rdata;
+
+    mem u_mem(
+        .iw_clk  (iw_clk),
+        .iw_we   (w_mem_we),
+        .iw_addr (w_mem_addr),
+        .iw_wdata(w_mem_wdata),
+        .or_rdata(w_mem_rdata)
+    );
+
+    wire                w_ia_valid;
     reg  [`HBIT_ADDR:0] r_ia_pc;
     wire [`HBIT_ADDR:0] w_iaif_pc;
     wire [`HBIT_ADDR:0] w_ifid_pc;
@@ -32,54 +45,72 @@ module diad(
         end
     end
 
-    wire                w_mem_we;
-    wire [`HBIT_ADDR:0] w_mem_addr;
-    wire [`HBIT_DATA:0] w_mem_wdata;
-    wire [`HBIT_DATA:0] w_mem_rdata;
-
-    mem u_mem(
-        .iw_clk  (iw_clk),
-        .iw_we   (w_mem_we),
-        .iw_addr (w_mem_addr),
-        .iw_wdata(w_mem_wdata),
-        .or_rdata(w_mem_rdata)
-    );
-
     stg1ia u_stg1ia(
         .iw_clk     (iw_clk),
         .iw_rst     (iw_rst),
         .ow_mem_addr(w_mem_addr),
         .iw_pc      (r_ia_pc),
         .ow_pc      (w_iaif_pc),
-        .ow_ia_valid(r_ia_valid)
+        .ow_ia_valid(w_ia_valid)
     );
 
     stg1if u_stg1if(
         .iw_clk     (iw_clk),
         .iw_rst     (iw_rst),
         .iw_mem_data(w_mem_rdata),
-        .iw_ia_valid(r_ia_valid),
+        .iw_ia_valid(w_ia_valid),
         .iw_pc      (w_iaif_pc),
         .ow_pc      (w_ifid_pc),
         .ow_instr   (w_ifid_instr)
     );
 
+    wire [`HBIT_OPC:0]    w_opc;
+    wire                  w_sgn_en;
+    wire                  w_imm_en;
+    wire [`HBIT_IMM:0]    w_imm_val;
+    wire [`HBIT_IMMSR:0]  w_immsr_val;
+    wire [`HBIT_CC:0]     w_cc;
+    wire [`HBIT_TGT_GP:0] w_tgt_gp;
+    wire [`HBIT_TGT_SR:0] w_tgt_sr;
+    wire [`HBIT_SRC_GP:0] w_src_gp;
+    wire [`HBIT_SRC_SR:0] w_src_sr;
+
     stg2id u_stg2id(
-        .iw_clk  (iw_clk),
-        .iw_rst  (iw_rst),
-        .iw_pc   (w_ifid_pc),
-        .ow_pc   (w_idex_pc),
-        .iw_instr(w_ifid_instr),
-        .ow_instr(w_idex_instr)
+        .iw_clk      (iw_clk),
+        .iw_rst      (iw_rst),
+        .iw_pc       (w_ifid_pc),
+        .ow_pc       (w_idex_pc),
+        .iw_instr    (w_ifid_instr),
+        .ow_instr    (w_idex_instr),
+        .ow_opc      (w_opc),
+        .ow_sgn_en   (w_sgn_en),
+        .ow_imm_en   (w_imm_en),
+        .ow_imm_val  (w_imm_val),
+        .ow_immsr_val(w_immsr_val),
+        .ow_cc       (w_cc),
+        .ow_tgt_gp   (w_tgt_gp),
+        .ow_tgt_sr   (w_tgt_sr),
+        .ow_src_gp   (w_src_gp),
+        .ow_src_sr   (w_src_sr)
     );
 
     stg3ex u_stg3ex(
-        .iw_clk  (iw_clk),
-        .iw_rst  (iw_rst),
-        .iw_pc   (w_idex_pc),
-        .ow_pc   (w_exma_pc),
-        .iw_instr(w_idex_instr),
-        .ow_instr(w_exma_instr)
+        .iw_clk      (iw_clk),
+        .iw_rst      (iw_rst),
+        .iw_pc       (w_idex_pc),
+        .ow_pc       (w_exma_pc),
+        .iw_instr    (w_idex_instr),
+        .ow_instr    (w_exma_instr),
+        .iw_opc      (w_opc),
+        .iw_sgn_en   (w_sgn_en),
+        .iw_imm_en   (w_imm_en),
+        .iw_imm_val  (w_imm_val),
+        .iw_immsr_val(w_immsr_val),
+        .iw_cc       (w_cc),
+        .iw_tgt_gp   (w_tgt_gp),
+        .iw_tgt_sr   (w_tgt_sr),
+        .iw_src_gp   (w_src_gp),
+        .iw_src_sr   (w_src_sr)
     );
 
     stg4ma u_stg4ma(
