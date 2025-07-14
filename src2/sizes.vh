@@ -13,6 +13,8 @@
 `define SIZE_SRC_GP  4
 `define SIZE_SRC_SR  4
 
+`define HBIT_GP   15
+`define HBIT_SR   15
 `define HBIT_ADDR 23
 `define HBIT_DATA 23
 

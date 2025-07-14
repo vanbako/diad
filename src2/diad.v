@@ -1,9 +1,13 @@
 `include "src2/sizes.vh"
+`include "src2/sr.vh"
 
 module diad(
     input wire iw_clk,
     input wire iw_rst
 );
+    reg [`HBIT_DATA:0] r_gp[`HBIT_GP:0];
+    reg [`HBIT_DATA:0] r_sr[`HBIT_SR:0];
+
     wire                w_mem_we;
     wire [`HBIT_ADDR:0] w_mem_addr;
     wire [`HBIT_DATA:0] w_mem_wdata;
@@ -18,7 +22,6 @@ module diad(
     );
 
     wire                w_ia_valid;
-    reg  [`HBIT_ADDR:0] r_ia_pc;
     wire [`HBIT_ADDR:0] w_iaif_pc;
     wire [`HBIT_ADDR:0] w_ifid_pc;
     wire [`HBIT_ADDR:0] w_idex_pc;
@@ -36,12 +39,16 @@ module diad(
     wire [`HBIT_DATA:0] w_raro_instr;
     wire [`HBIT_DATA:0] w_ro_instr;
 
+    integer i;
     always @(posedge iw_clk or posedge iw_rst) begin
         if (iw_rst) begin
-            r_ia_pc    <= `SIZE_ADDR'b0;
+            for (i = 0; i <= `HBIT_GP; i = i + 1)
+                r_gp[i] <= {`SIZE_DATA'b0};
+            for (i = 0; i <= `HBIT_SR; i = i + 1)
+                r_sr[i] <= {`SIZE_DATA'b0};
         end
         else begin
-            r_ia_pc    <= r_ia_pc + `SIZE_ADDR'd1;
+            r_sr[`INDEX_PC] <= r_sr[`INDEX_PC] + `SIZE_ADDR'd1;
         end
     end
 
@@ -49,7 +56,7 @@ module diad(
         .iw_clk     (iw_clk),
         .iw_rst     (iw_rst),
         .ow_mem_addr(w_mem_addr),
-        .iw_pc      (r_ia_pc),
+        .iw_pc      (r_sr[`INDEX_PC]),
         .ow_pc      (w_iaif_pc),
         .ow_ia_valid(w_ia_valid)
     );
@@ -94,6 +101,8 @@ module diad(
         .ow_src_sr   (w_src_sr)
     );
 
+    wire [`HBIT_DATA:0] w_exma_result;
+
     stg3ex u_stg3ex(
         .iw_clk      (iw_clk),
         .iw_rst      (iw_rst),
@@ -110,7 +119,10 @@ module diad(
         .iw_tgt_gp   (w_tgt_gp),
         .iw_tgt_sr   (w_tgt_sr),
         .iw_src_gp   (w_src_gp),
-        .iw_src_sr   (w_src_sr)
+        .iw_src_sr   (w_src_sr),
+        .iw_gp       (r_gp),
+        .iw_sr       (r_sr),
+        .ow_result   (w_exma_result)
     );
 
     stg4ma u_stg4ma(

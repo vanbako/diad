@@ -1,4 +1,5 @@
 `include "src2/sizes.vh"
+`include "src2/sr.vh"
 
 module stg3ex(
     input wire                   iw_clk,
@@ -16,20 +17,71 @@ module stg3ex(
     input wire  [`HBIT_TGT_GP:0] iw_tgt_gp,
     input wire  [`HBIT_TGT_SR:0] iw_tgt_sr,
     input wire  [`HBIT_SRC_GP:0] iw_src_gp,
-    input wire  [`HBIT_SRC_SR:0] iw_src_sr
+    input wire  [`HBIT_SRC_SR:0] iw_src_sr,
+    input wire  [`HBIT_DATA:0]   iw_gp[`HBIT_GP:0],
+    input wire  [`HBIT_DATA:0]   iw_sr[`HBIT_SR:0],
+    output wire [`HBIT_DATA:0]   ow_result
 );
+    reg [`HBIT_IMM:0] r_ui;
+    reg [`HBIT_DATA:0] r_result;
+
+    always @* begin
+        case (iw_opc)
+            `OPC_R_MOV: begin
+                r_result = iw_gp[iw_src_gp];
+            end
+            `OPC_R_ADD: begin
+                r_result = iw_gp[iw_src_gp] + iw_gp[iw_tgt_gp];
+            end
+            `OPC_R_SUB: begin
+                r_result = iw_gp[iw_src_gp] - iw_gp[iw_tgt_gp];
+            end
+            `OPC_R_NOT: begin
+                r_result = ~iw_gp[iw_tgt_gp];
+            end
+            `OPC_R_AND: begin
+                r_result = iw_gp[iw_src_gp] & iw_gp[iw_tgt_gp];
+            end
+            `OPC_R_OR: begin
+                r_result = iw_gp[iw_src_gp] | iw_gp[iw_tgt_gp];
+            end
+            `OPC_R_XOR: begin
+                r_result = iw_gp[iw_src_gp] ^ iw_gp[iw_tgt_gp];
+            end
+            `OPC_I_MOVi: begin
+                r_result = {r_ui, iw_imm_val};
+            end
+            `OPC_IS_MOVis: begin
+                r_result = {{12{iw_imm_val[`HBIT_IMM]}}, iw_imm_val};
+            end
+            `OPC_S_LUI: begin
+                r_ui = iw_imm_val;
+            end
+            `OPC_S_SRMOV: begin
+                r_result = (iw_src_sr == `INDEX_PC) ? iw_pc : iw_sr[iw_src_sr];
+            end
+            default: begin
+                r_result = `SIZE_DATA'b0;
+            end
+        endcase
+    end
+
     reg [`HBIT_ADDR:0] r_pc_latch;
     reg [`HBIT_DATA:0] r_instr_latch;
+    reg [`HBIT_DATA:0] r_result_latch;
     always @(posedge iw_clk or posedge iw_rst) begin
         if (iw_rst) begin
-            r_pc_latch    <= `SIZE_ADDR'b0;
-            r_instr_latch <= `SIZE_DATA'b0;
+            r_pc_latch     <= `SIZE_ADDR'b0;
+            r_instr_latch  <= `SIZE_DATA'b0;
+            r_result_latch <= `SIZE_DATA'b0;
         end
         else begin
-            r_pc_latch    <= iw_pc;
-            r_instr_latch <= iw_instr;
+            r_pc_latch     <= iw_pc;
+            r_instr_latch  <= iw_instr;
+            r_result_latch <= r_result;
         end
     end
-    assign ow_pc    = r_pc_latch;
-    assign ow_instr = r_instr_latch;
+    assign ow_pc     = r_pc_latch;
+    assign ow_instr  = r_instr_latch;
+    assign ow_result = r_result_latch;
 endmodule

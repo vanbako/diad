@@ -59,6 +59,11 @@ module testbench;
                  u_diad.w_src_gp,
                  u_diad.w_src_sr);
 `endif
+`ifdef DEBUGEXECUTE
+        $display("tick %03d : rst=%b EXECUTE RES=%h",
+                 tick, r_rst,
+                 u_diad.w_exma_result);
+`endif
         tick = tick + 1;
     end
 endmodule

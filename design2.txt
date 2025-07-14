@@ -36,8 +36,7 @@ Branch condition codes use some of the same bits as TGT, as TGT is not used in b
 
 i after the instruction means immediate value (upper from IR and lower from IMM)
 s after the instruction means signed operation
-is after the instruction means signed immediate operation (upper from IR and lower from IMM)
-is after a BCC instruction means signed immediate operation (only lower 12 bits of immediate are used, upper 12 bits are ignored)
+is after the instruction means signed immediate operation (sign extended immediate, only lower 12 bits of immediate are used, upper 12 bits are ignored)
 
 In the assembly language, first operand is source, second operand is target.
 
