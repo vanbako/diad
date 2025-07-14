@@ -147,6 +147,8 @@ module diad(
         .iw_pc   (w_mowb_pc),
         .ow_pc   (w_wb_pc),
         .iw_instr(w_mowb_instr),
-        .ow_instr(w_wb_instr)
+        .ow_instr(w_wb_instr),
+        .iw_gp   (r_gp),
+        .iw_sr   (r_sr)
     );
 endmodule

@@ -6,7 +6,9 @@ module stg5wb(
     input wire  [`HBIT_ADDR:0] iw_pc,
     output wire [`HBIT_ADDR:0] ow_pc,
     input wire  [`HBIT_DATA:0] iw_instr,
-    output wire [`HBIT_DATA:0] ow_instr
+    output wire [`HBIT_DATA:0] ow_instr,
+    input wire  [`HBIT_DATA:0] iw_gp[`HBIT_GP:0],
+    input wire  [`HBIT_DATA:0] iw_sr[`HBIT_SR:0]
 );
     reg [`HBIT_ADDR:0] r_pc_latch;
     reg [`HBIT_DATA:0] r_instr_latch;
