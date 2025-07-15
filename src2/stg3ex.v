@@ -21,86 +21,93 @@ module stg3ex(
     output wire [`HBIT_TGT_SR:0] ow_tgt_sr,
     input wire  [`HBIT_SRC_GP:0] iw_src_gp,
     input wire  [`HBIT_SRC_SR:0] iw_src_sr,
-    input wire  [`HBIT_DATA:0]   iw_gp[`HBIT_GP:0],
+    output wire [`HBIT_TGT_GP:0] ow_gp_read_addr1,
+    output wire [`HBIT_TGT_GP:0] ow_gp_read_addr2,
+    input wire  [`HBIT_DATA:0]   iw_gp_read_data1,
+    input wire  [`HBIT_DATA:0]   iw_gp_read_data2,
+    // input wire  [`HBIT_DATA:0]   iw_gp[`HBIT_GP:0],
     input wire  [`HBIT_DATA:0]   iw_sr[`HBIT_SR:0],
     output wire [`HBIT_DATA:0]   ow_result
 );
     reg [`HBIT_IMM:0]  r_ui;
     reg [`HBIT_DATA:0] r_result;
 
+    assign ow_gp_read_addr1 = iw_src_gp;
+    assign ow_gp_read_addr2 = iw_tgt_gp;
+
     always @* begin
         case (iw_opc)
             `OPC_R_MOV: begin
-                r_result = iw_gp[iw_src_gp];
+                r_result = iw_gp_read_data1;
             end
             `OPC_R_ADD: begin
-                r_result = iw_gp[iw_src_gp] + iw_gp[iw_tgt_gp];
+                r_result = iw_gp_read_data1 + iw_gp_read_data2;
             end
             `OPC_R_SUB: begin
-                r_result = iw_gp[iw_src_gp] - iw_gp[iw_tgt_gp];
+                r_result = iw_gp_read_data1 - iw_gp_read_data2;
             end
             `OPC_R_NOT: begin
-                r_result = ~iw_gp[iw_tgt_gp];
+                r_result = ~iw_gp_read_data2;
             end
             `OPC_R_AND: begin
-                r_result = iw_gp[iw_src_gp] & iw_gp[iw_tgt_gp];
+                r_result = iw_gp_read_data1 & iw_gp_read_data2;
             end
             `OPC_R_OR: begin
-                r_result = iw_gp[iw_src_gp] | iw_gp[iw_tgt_gp];
+                r_result = iw_gp_read_data1 | iw_gp_read_data2;
             end
             `OPC_R_XOR: begin
-                r_result = iw_gp[iw_src_gp] ^ iw_gp[iw_tgt_gp];
+                r_result = iw_gp_read_data1 ^ iw_gp_read_data2;
             end
             `OPC_R_SHL: begin
-                r_result = iw_gp[iw_tgt_gp] << iw_gp[iw_src_gp][4:0];
+                r_result = iw_gp_read_data2 << iw_gp_read_data1[4:0];
             end
             `OPC_R_SHR: begin
-                r_result = iw_gp[iw_tgt_gp] >> iw_gp[iw_src_gp][4:0];
+                r_result = iw_gp_read_data2 >> iw_gp_read_data1[4:0];
             end
             `OPC_RS_ADDs: begin
-                r_result = $signed(iw_gp[iw_src_gp]) + $signed(iw_gp[iw_tgt_gp]);
+                r_result = $signed(iw_gp_read_data1) + $signed(iw_gp_read_data2);
             end
             `OPC_RS_SUBs: begin
-                r_result = $signed(iw_gp[iw_src_gp]) - $signed(iw_gp[iw_tgt_gp]);
+                r_result = $signed(iw_gp_read_data1) - $signed(iw_gp_read_data2);
             end
             `OPC_RS_SHRs: begin
-                r_result = $signed(iw_gp[iw_tgt_gp]) >>> iw_gp[iw_src_gp][4:0];
+                r_result = $signed(iw_gp_read_data2) >>> iw_gp_read_data1[4:0];
             end
             `OPC_I_MOVi: begin
                 r_result = {r_ui, iw_imm_val};
             end
             `OPC_I_ADDi: begin
-                r_result = iw_gp[iw_src_gp] + {r_ui, iw_imm_val};
+                r_result = iw_gp_read_data1 + {r_ui, iw_imm_val};
             end
             `OPC_I_SUBi: begin
-                r_result = iw_gp[iw_src_gp] - {r_ui, iw_imm_val};
+                r_result = iw_gp_read_data1 - {r_ui, iw_imm_val};
             end
             `OPC_I_ANDi: begin
-                r_result = iw_gp[iw_src_gp] & {r_ui, iw_imm_val};
+                r_result = iw_gp_read_data1 & {r_ui, iw_imm_val};
             end
             `OPC_I_ORi: begin
-                r_result = iw_gp[iw_src_gp] | {r_ui, iw_imm_val};
+                r_result = iw_gp_read_data1 | {r_ui, iw_imm_val};
             end
             `OPC_I_XORi: begin
-                r_result = iw_gp[iw_src_gp] ^ {r_ui, iw_imm_val};
+                r_result = iw_gp_read_data1 ^ {r_ui, iw_imm_val};
             end
             `OPC_I_SHLi: begin
-                r_result = iw_gp[iw_src_gp] << iw_imm_val[4:0];
+                r_result = iw_gp_read_data1 << iw_imm_val[4:0];
             end
             `OPC_I_SHRi: begin
-                r_result = iw_gp[iw_src_gp] >> iw_imm_val[4:0];
+                r_result = iw_gp_read_data1 >> iw_imm_val[4:0];
             end
             `OPC_IS_MOVis: begin
                 r_result = {{12{iw_imm_val[`HBIT_IMM]}}, iw_imm_val};
             end
             `OPC_IS_ADDis: begin
-                r_result = iw_gp[iw_src_gp] + iw_imm_val;
+                r_result = iw_gp_read_data1 + iw_imm_val;
             end
             `OPC_IS_SUBis: begin
-                r_result = iw_gp[iw_src_gp] - iw_imm_val;
+                r_result = iw_gp_read_data1 - iw_imm_val;
             end
             `OPC_IS_SHRis: begin
-                r_result = $signed(iw_gp[iw_src_gp]) >> iw_imm_val[4:0];
+                r_result = $signed(iw_gp_read_data1) >> iw_imm_val[4:0];
             end
             `OPC_S_LUI: begin
                 r_ui = iw_imm_val;

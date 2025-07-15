@@ -35,6 +35,18 @@ module testbench;
                  u_diad.w_mowb_pc,
                  u_diad.w_wb_pc);
 `endif
+`ifdef DEBUGGP
+        $display("tick %03d : rst=%b GP  0=%h 1=%h 2=%h 3=%h 4=%h 5=%h 6=%h 7=%h",
+                 tick, r_rst,
+                 u_diad.u_reggp.r_gp[0],
+                 u_diad.u_reggp.r_gp[1],
+                 u_diad.u_reggp.r_gp[2],
+                 u_diad.u_reggp.r_gp[3],
+                 u_diad.u_reggp.r_gp[4],
+                 u_diad.u_reggp.r_gp[5],
+                 u_diad.u_reggp.r_gp[6],
+                 u_diad.u_reggp.r_gp[7]);
+`endif
 `ifdef DEBUGINSTR
         $display("tick %03d : rst=%b INSTR                     IFID=%h IDEX=%h EXMA=%h MAMO=%h MOWB=%h WB=%h",
                  tick, r_rst,
