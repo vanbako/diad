@@ -25,8 +25,10 @@ module stg3ex(
     output wire [`HBIT_TGT_GP:0] ow_gp_read_addr2,
     input wire  [`HBIT_DATA:0]   iw_gp_read_data1,
     input wire  [`HBIT_DATA:0]   iw_gp_read_data2,
-    // input wire  [`HBIT_DATA:0]   iw_gp[`HBIT_GP:0],
-    input wire  [`HBIT_DATA:0]   iw_sr[`HBIT_SR:0],
+    output wire [`HBIT_TGT_SR:0] ow_sr_read_addr1,
+    output wire [`HBIT_TGT_SR:0] ow_sr_read_addr2,
+    input wire  [`HBIT_DATA:0]   iw_sr_read_data1,
+    input wire  [`HBIT_DATA:0]   iw_sr_read_data2,
     output wire [`HBIT_DATA:0]   ow_result
 );
     reg [`HBIT_IMM:0]  r_ui;
@@ -34,6 +36,8 @@ module stg3ex(
 
     assign ow_gp_read_addr1 = iw_src_gp;
     assign ow_gp_read_addr2 = iw_tgt_gp;
+    assign ow_sr_read_addr1 = iw_src_sr;
+    assign ow_sr_read_addr2 = iw_tgt_sr;
 
     always @* begin
         case (iw_opc)
@@ -113,7 +117,7 @@ module stg3ex(
                 r_ui = iw_imm_val;
             end
             `OPC_S_SRMOV: begin
-                r_result = (iw_src_sr == `INDEX_PC) ? iw_pc : iw_sr[iw_src_sr];
+                r_result = (iw_src_sr == `INDEX_PC) ? iw_pc : iw_sr_read_data1;
             end
             default: begin
                 r_result = `SIZE_DATA'b0;
