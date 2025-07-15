@@ -63,6 +63,23 @@ module testbench;
                  u_diad.w_mowb_tgt_gp,
                  u_diad.w_wb_tgt_gp);
 `endif
+`ifdef DEBUGTGT_SR
+        $display("tick %03d : rst=%b TGT_SR                                IDEX=%h      EXMA=%h      MAMO=%h      MOWB=%h      WB=%h",
+                 tick, r_rst,
+                 u_diad.w_tgt_sr,
+                 u_diad.w_exma_tgt_sr,
+                 u_diad.w_mamo_tgt_sr,
+                 u_diad.w_mowb_tgt_sr,
+                 u_diad.w_wb_tgt_sr);
+`endif
+`ifdef DEBUGRESULT
+        $display("tick %03d : rst=%b RESULT                                            EXMA=%h MAMO=%h MOWB=%h WB=%h",
+                 tick, r_rst,
+                 u_diad.w_exma_result,
+                 u_diad.w_mamo_result,
+                 u_diad.w_mowb_result,
+                 u_diad.w_wb_result);
+`endif
 `ifdef DEBUGDECODE
         $display("tick %03d : rst=%b DECODE OPC=%-8s SGN_EN=%b IMM_EN=%b IMM_VAL=%h IMMSR_VAL=%h CC=%2s TGT_GP=%h TGT_SR=%h SRC_GP=%h SRC_SR=%h",
                  tick, r_rst,
