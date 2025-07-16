@@ -17,6 +17,7 @@
 `define HBIT_SR   15
 `define HBIT_ADDR 23
 `define HBIT_DATA 23
+`define HBIT_FLAG  3
 
 `define HBIT_INSTR_OPC    23
 `define LBIT_INSTR_OPC    16

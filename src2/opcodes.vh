@@ -46,7 +46,7 @@
 `define OPC_IS_MOVis 8'h32
 `define OPC_IS_ADDis 8'h33
 `define OPC_IS_SUBis 8'h34
-`define OPC_IS_SHRis  8'h3A
+`define OPC_IS_SHRis 8'h3A
 `define OPC_IS_CMPis 8'h3B
 `define OPC_IS_BCCis 8'h3D
 

@@ -1,5 +1,7 @@
 `include "src2/sizes.vh"
 `include "src2/sr.vh"
+`include "src2/flags.vh"
+`include "src2/opc.vh"
 
 module stg3ex(
     input wire                   iw_clk,
@@ -32,7 +34,10 @@ module stg3ex(
     output wire [`HBIT_DATA:0]   ow_result
 );
     reg [`HBIT_IMM:0]  r_ui;
+    reg [`HBIT_DATA:0] r_ir;
+    reg [`HBIT_DATA:0] r_se_imm_val;
     reg [`HBIT_DATA:0] r_result;
+    reg [`HBIT_FLAG:0] r_fl;
 
     assign ow_gp_read_addr1 = iw_src_gp;
     assign ow_gp_read_addr2 = iw_tgt_gp;
@@ -40,33 +45,64 @@ module stg3ex(
     assign ow_sr_read_addr2 = iw_tgt_sr;
 
     always @* begin
+        r_fl         = {`SIZE_FLAG{1'b0}};
+        r_result     = {`SIZE_DATA{1'b0}};
+        r_ir         = {r_ui, iw_imm_val};
+        r_se_imm_val = {{`SIZE_IMM{iw_imm_val[`HBIT_IMM]}}, iw_imm_val};
         case (iw_opc)
             `OPC_R_MOV: begin
                 r_result = iw_gp_read_data1;
+                r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
             end
             `OPC_R_ADD: begin
                 r_result = iw_gp_read_data1 + iw_gp_read_data2;
+                r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
+                r_fl[`FLAG_C] = (r_result < iw_gp_read_data1) ? 1'b1 : 1'b0;
             end
             `OPC_R_SUB: begin
                 r_result = iw_gp_read_data1 - iw_gp_read_data2;
+                r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
+                r_fl[`FLAG_C] = (iw_gp_read_data1 < iw_gp_read_data2) ? 1'b1 : 1'b0;
             end
             `OPC_R_NOT: begin
                 r_result = ~iw_gp_read_data2;
+                r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
             end
             `OPC_R_AND: begin
                 r_result = iw_gp_read_data1 & iw_gp_read_data2;
+                r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
             end
             `OPC_R_OR: begin
                 r_result = iw_gp_read_data1 | iw_gp_read_data2;
+                r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
             end
             `OPC_R_XOR: begin
                 r_result = iw_gp_read_data1 ^ iw_gp_read_data2;
+                r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
             end
             `OPC_R_SHL: begin
-                r_result = iw_gp_read_data2 << iw_gp_read_data1[4:0];
+                if (iw_gp_read_data1 >= `SIZE_DATA) begin
+                    r_result = {`SIZE_DATA{1'b0}};
+                    r_fl[`FLAG_V] = 1'b1;
+                end else begin
+                    r_result = iw_gp_read_data2 << iw_gp_read_data1[4:0];
+                    r_fl[`FLAG_V] = 1'b0;
+                end
+                r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
             end
             `OPC_R_SHR: begin
-                r_result = iw_gp_read_data2 >> iw_gp_read_data1[4:0];
+                if (iw_gp_read_data1 >= `SIZE_DATA) begin
+                    r_result = {`SIZE_DATA{1'b0}};
+                    r_fl[`FLAG_V] = 1'b1;
+                end else begin
+                    r_result = iw_gp_read_data2 >> iw_gp_read_data1[4:0];
+                    r_fl[`FLAG_V] = 1'b0;
+                end
+                r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
+            end
+            `OPC_R_CMP: begin
+                r_fl[`FLAG_Z] = (iw_gp_read_data1 == iw_gp_read_data2) ? 1'b1 : 1'b0;
+                r_fl[`FLAG_C] = (iw_gp_read_data1 < iw_gp_read_data2) ? 1'b1 : 1'b0;
             end
             `OPC_RS_ADDs: begin
                 r_result = $signed(iw_gp_read_data1) + $signed(iw_gp_read_data2);
@@ -77,23 +113,31 @@ module stg3ex(
             `OPC_RS_SHRs: begin
                 r_result = $signed(iw_gp_read_data2) >>> iw_gp_read_data1[4:0];
             end
+            `OPC_RS_CMPs: begin
+                reg signed [`HBIT_DATA:0] s_diff;
+                s_diff = $signed(iw_gp_read_data1) - $signed(iw_gp_read_data2);
+                r_fl[`FLAG_Z] = (iw_gp_read_data1 == iw_gp_read_data2) ? 1'b1 : 1'b0;
+                r_fl[`FLAG_N] = (s_diff < 0) ? 1'b1 : 1'b0;
+                r_fl[`FLAG_V] = ((iw_gp_read_data1[`HBIT_DATA] ^ iw_gp_read_data2[`HBIT_DATA]) &
+                                 (iw_gp_read_data1[`HBIT_DATA] ^ s_diff[`HBIT_DATA]));
+            end
             `OPC_I_MOVi: begin
-                r_result = {r_ui, iw_imm_val};
+                r_result = r_ir;
             end
             `OPC_I_ADDi: begin
-                r_result = iw_gp_read_data1 + {r_ui, iw_imm_val};
+                r_result = iw_gp_read_data1 + r_ir;
             end
             `OPC_I_SUBi: begin
-                r_result = iw_gp_read_data1 - {r_ui, iw_imm_val};
+                r_result = iw_gp_read_data1 - r_ir;
             end
             `OPC_I_ANDi: begin
-                r_result = iw_gp_read_data1 & {r_ui, iw_imm_val};
+                r_result = iw_gp_read_data1 & r_ir;
             end
             `OPC_I_ORi: begin
-                r_result = iw_gp_read_data1 | {r_ui, iw_imm_val};
+                r_result = iw_gp_read_data1 | r_ir;
             end
             `OPC_I_XORi: begin
-                r_result = iw_gp_read_data1 ^ {r_ui, iw_imm_val};
+                r_result = iw_gp_read_data1 ^ r_ir;
             end
             `OPC_I_SHLi: begin
                 r_result = iw_gp_read_data1 << iw_imm_val[4:0];
@@ -101,17 +145,29 @@ module stg3ex(
             `OPC_I_SHRi: begin
                 r_result = iw_gp_read_data1 >> iw_imm_val[4:0];
             end
+            `OPC_R_CMPi: begin
+                r_fl[`FLAG_Z] = (iw_gp_read_data1 == r_ir) ? 1'b1 : 1'b0;
+                r_fl[`FLAG_C] = (iw_gp_read_data1 < r_ir) ? 1'b1 : 1'b0;
+            end
             `OPC_IS_MOVis: begin
-                r_result = {{12{iw_imm_val[`HBIT_IMM]}}, iw_imm_val};
+                r_result = r_se_imm_val;
             end
             `OPC_IS_ADDis: begin
-                r_result = iw_gp_read_data1 + iw_imm_val;
+                r_result = $signed(iw_gp_read_data1) + $signed(r_se_imm_val);
             end
             `OPC_IS_SUBis: begin
-                r_result = iw_gp_read_data1 - iw_imm_val;
+                r_result = $signed(iw_gp_read_data1) - $signed(r_se_imm_val);
             end
             `OPC_IS_SHRis: begin
                 r_result = $signed(iw_gp_read_data1) >> iw_imm_val[4:0];
+            end
+            `OPC_RS_CMPis: begin
+                reg signed [`HBIT_DATA:0] s_diff;
+                s_diff = $signed(iw_gp_read_data1) - $signed(r_se_imm_val);
+                r_fl[`FLAG_Z] = (iw_gp_read_data1 == r_se_imm_val) ? 1'b1 : 1'b0;
+                r_fl[`FLAG_N] = (s_diff < 0) ? 1'b1 : 1'b0;
+                r_fl[`FLAG_V] = ((iw_gp_read_data1[`HBIT_DATA] ^ r_se_imm_val[`HBIT_DATA]) &
+                                 (iw_gp_read_data1[`HBIT_DATA] ^ s_diff[`HBIT_DATA]));
             end
             `OPC_S_LUI: begin
                 r_ui = iw_imm_val;
@@ -121,6 +177,7 @@ module stg3ex(
             end
             default: begin
                 r_result = `SIZE_DATA'b0;
+                r_fl     = `SIZE_FLAG'b0;
             end
         endcase
     end
