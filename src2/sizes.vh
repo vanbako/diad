@@ -3,6 +3,7 @@
 
 `define SIZE_ADDR 24
 `define SIZE_DATA 24
+`define SIZE_FLAG  4
 
 `define SIZE_OPC     8
 `define SIZE_CC      4

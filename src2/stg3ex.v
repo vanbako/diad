@@ -1,7 +1,7 @@
 `include "src2/sizes.vh"
 `include "src2/sr.vh"
 `include "src2/flags.vh"
-`include "src2/opc.vh"
+`include "src2/opcodes.vh"
 
 module stg3ex(
     input wire                   iw_clk,
@@ -38,6 +38,8 @@ module stg3ex(
     reg [`HBIT_DATA:0] r_se_imm_val;
     reg [`HBIT_DATA:0] r_result;
     reg [`HBIT_FLAG:0] r_fl;
+    reg [`HBIT_DATA:0] r_src_val;
+    reg [`HBIT_DATA:0] r_tgt_val;
 
     assign ow_gp_read_addr1 = iw_src_gp;
     assign ow_gp_read_addr2 = iw_tgt_gp;
@@ -49,131 +51,187 @@ module stg3ex(
         r_result     = {`SIZE_DATA{1'b0}};
         r_ir         = {r_ui, iw_imm_val};
         r_se_imm_val = {{`SIZE_IMM{iw_imm_val[`HBIT_IMM]}}, iw_imm_val};
+        r_src_val    = iw_gp_read_data1;
+        r_tgt_val    = iw_gp_read_data2;
         case (iw_opc)
             `OPC_R_MOV: begin
-                r_result = iw_gp_read_data1;
+                r_result = r_src_val;
                 r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
             end
             `OPC_R_ADD: begin
-                r_result = iw_gp_read_data1 + iw_gp_read_data2;
+                r_result = r_src_val + r_tgt_val;
                 r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
-                r_fl[`FLAG_C] = (r_result < iw_gp_read_data1) ? 1'b1 : 1'b0;
+                r_fl[`FLAG_C] = (r_result < r_src_val) ? 1'b1 : 1'b0;
             end
             `OPC_R_SUB: begin
-                r_result = iw_gp_read_data1 - iw_gp_read_data2;
+                r_result = r_tgt_val - r_src_val;
                 r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
-                r_fl[`FLAG_C] = (iw_gp_read_data1 < iw_gp_read_data2) ? 1'b1 : 1'b0;
+                r_fl[`FLAG_C] = (r_src_val < r_tgt_val) ? 1'b1 : 1'b0;
             end
             `OPC_R_NOT: begin
-                r_result = ~iw_gp_read_data2;
+                r_result = ~r_tgt_val;
                 r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
             end
             `OPC_R_AND: begin
-                r_result = iw_gp_read_data1 & iw_gp_read_data2;
+                r_result = r_src_val & r_tgt_val;
                 r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
             end
             `OPC_R_OR: begin
-                r_result = iw_gp_read_data1 | iw_gp_read_data2;
+                r_result = r_src_val | r_tgt_val;
                 r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
             end
             `OPC_R_XOR: begin
-                r_result = iw_gp_read_data1 ^ iw_gp_read_data2;
+                r_result = r_src_val ^ r_tgt_val;
                 r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
             end
             `OPC_R_SHL: begin
-                if (iw_gp_read_data1 >= `SIZE_DATA) begin
+                if (r_src_val >= `SIZE_DATA) begin
                     r_result = {`SIZE_DATA{1'b0}};
                     r_fl[`FLAG_V] = 1'b1;
                 end else begin
-                    r_result = iw_gp_read_data2 << iw_gp_read_data1[4:0];
+                    r_result = r_tgt_val << r_src_val[4:0];
                     r_fl[`FLAG_V] = 1'b0;
                 end
                 r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
             end
             `OPC_R_SHR: begin
-                if (iw_gp_read_data1 >= `SIZE_DATA) begin
+                if (r_src_val >= `SIZE_DATA) begin
                     r_result = {`SIZE_DATA{1'b0}};
                     r_fl[`FLAG_V] = 1'b1;
                 end else begin
-                    r_result = iw_gp_read_data2 >> iw_gp_read_data1[4:0];
+                    r_result = r_tgt_val >> r_src_val[4:0];
                     r_fl[`FLAG_V] = 1'b0;
                 end
                 r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
             end
             `OPC_R_CMP: begin
-                r_fl[`FLAG_Z] = (iw_gp_read_data1 == iw_gp_read_data2) ? 1'b1 : 1'b0;
-                r_fl[`FLAG_C] = (iw_gp_read_data1 < iw_gp_read_data2) ? 1'b1 : 1'b0;
+                r_fl[`FLAG_Z] = (r_src_val == r_tgt_val) ? 1'b1 : 1'b0;
+                r_fl[`FLAG_C] = (r_src_val < r_tgt_val) ? 1'b1 : 1'b0;
             end
             `OPC_RS_ADDs: begin
-                r_result = $signed(iw_gp_read_data1) + $signed(iw_gp_read_data2);
+                r_result = $signed(r_src_val) + $signed(r_tgt_val);
+                r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
+                r_fl[`FLAG_N] = ($signed(r_result) < 0) ? 1'b1 : 1'b0;
+                r_fl[`FLAG_V] =
+                    ((~(r_src_val[`HBIT_DATA-1] ^ r_tgt_val[`HBIT_DATA-1])) &&
+                    (r_src_val[`HBIT_DATA-1] ^ r_result[`HBIT_DATA-1])) ? 1'b1 : 1'b0;
             end
             `OPC_RS_SUBs: begin
-                r_result = $signed(iw_gp_read_data1) - $signed(iw_gp_read_data2);
+                r_result = $signed(r_src_val) - $signed(r_tgt_val);
+                r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
+                r_fl[`FLAG_N] = ($signed(r_result) < 0) ? 1'b1 : 1'b0;
+                r_fl[`FLAG_V] =
+                    ((r_src_val[`HBIT_DATA-1] ^ r_tgt_val[`HBIT_DATA-1]) &&
+                    (r_src_val[`HBIT_DATA-1] ^ r_result[`HBIT_DATA-1])) ? 1'b1 : 1'b0;
             end
             `OPC_RS_SHRs: begin
-                r_result = $signed(iw_gp_read_data2) >>> iw_gp_read_data1[4:0];
+                if (r_src_val >= `SIZE_DATA) begin
+                    r_result = {`SIZE_DATA{1'b0}};
+                    r_fl[`FLAG_V] = 1'b1;
+                end else begin
+                    r_result = $signed(r_tgt_val) >>> r_src_val[4:0];
+                    r_fl[`FLAG_V] = 1'b0;
+                end
+                r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
+                r_fl[`FLAG_N] = (r_result[`HBIT_DATA] == 1'b1) ? 1'b1 : 1'b0;
             end
             `OPC_RS_CMPs: begin
                 reg signed [`HBIT_DATA:0] s_diff;
-                s_diff = $signed(iw_gp_read_data1) - $signed(iw_gp_read_data2);
-                r_fl[`FLAG_Z] = (iw_gp_read_data1 == iw_gp_read_data2) ? 1'b1 : 1'b0;
+                s_diff = $signed(r_tgt_val) - $signed(r_src_val);
+                r_fl[`FLAG_Z] = (r_src_val == r_tgt_val) ? 1'b1 : 1'b0;
                 r_fl[`FLAG_N] = (s_diff < 0) ? 1'b1 : 1'b0;
-                r_fl[`FLAG_V] = ((iw_gp_read_data1[`HBIT_DATA] ^ iw_gp_read_data2[`HBIT_DATA]) &
-                                 (iw_gp_read_data1[`HBIT_DATA] ^ s_diff[`HBIT_DATA]));
+                r_fl[`FLAG_V] =
+                    ((r_src_val[`HBIT_DATA] ^ r_tgt_val[`HBIT_DATA]) &
+                    (r_src_val[`HBIT_DATA] ^ s_diff[`HBIT_DATA]));
             end
             `OPC_I_MOVi: begin
                 r_result = r_ir;
+                r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
             end
             `OPC_I_ADDi: begin
-                r_result = iw_gp_read_data1 + r_ir;
+                r_result = r_tgt_val + r_ir;
+                r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
+                r_fl[`FLAG_C] = (r_result < r_tgt_val) ? 1'b1 : 1'b0;
             end
             `OPC_I_SUBi: begin
-                r_result = iw_gp_read_data1 - r_ir;
+                r_result = r_tgt_val - r_ir;
+                r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
+                r_fl[`FLAG_C] = (r_tgt_val < r_ir) ? 1'b1 : 1'b0;
             end
             `OPC_I_ANDi: begin
-                r_result = iw_gp_read_data1 & r_ir;
+                r_result = r_tgt_val & r_ir;
+                r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
             end
             `OPC_I_ORi: begin
-                r_result = iw_gp_read_data1 | r_ir;
+                r_result = r_tgt_val | r_ir;
+                r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
             end
             `OPC_I_XORi: begin
-                r_result = iw_gp_read_data1 ^ r_ir;
+                r_result = r_tgt_val ^ r_ir;
+                r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
             end
             `OPC_I_SHLi: begin
-                r_result = iw_gp_read_data1 << iw_imm_val[4:0];
+                if (r_ir >= `SIZE_DATA) begin
+                    r_result = {`SIZE_DATA{1'b0}};
+                    r_fl[`FLAG_V] = 1'b1;
+                end else begin
+                    r_result = r_tgt_val << r_ir[4:0];
+                    r_fl[`FLAG_V] = 1'b0;
+                end
+                r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
             end
             `OPC_I_SHRi: begin
-                r_result = iw_gp_read_data1 >> iw_imm_val[4:0];
+                if (r_ir >= `SIZE_DATA) begin
+                    r_result = {`SIZE_DATA{1'b0}};
+                    r_fl[`FLAG_V] = 1'b1;
+                end else begin
+                    r_result = r_tgt_val >> r_ir[4:0];
+                    r_fl[`FLAG_V] = 1'b0;
+                end
+                r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
             end
-            `OPC_R_CMPi: begin
-                r_fl[`FLAG_Z] = (iw_gp_read_data1 == r_ir) ? 1'b1 : 1'b0;
-                r_fl[`FLAG_C] = (iw_gp_read_data1 < r_ir) ? 1'b1 : 1'b0;
+            `OPC_I_CMPi: begin
+                r_fl[`FLAG_Z] = (r_tgt_val == r_ir) ? 1'b1 : 1'b0;
+                r_fl[`FLAG_C] = (r_tgt_val < r_ir) ? 1'b1 : 1'b0;
             end
             `OPC_IS_MOVis: begin
                 r_result = r_se_imm_val;
+                r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
             end
             `OPC_IS_ADDis: begin
-                r_result = $signed(iw_gp_read_data1) + $signed(r_se_imm_val);
+                r_result = $signed(r_tgt_val) + $signed(r_se_imm_val);
+                r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
+                r_fl[`FLAG_C] = (r_result < r_tgt_val) ? 1'b1 : 1'b0;
             end
             `OPC_IS_SUBis: begin
-                r_result = $signed(iw_gp_read_data1) - $signed(r_se_imm_val);
+                r_result = $signed(r_tgt_val) - $signed(r_se_imm_val);
+                r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
+                r_fl[`FLAG_C] = (r_tgt_val < r_se_imm_val) ? 1'b1 : 1'b0;
             end
             `OPC_IS_SHRis: begin
-                r_result = $signed(iw_gp_read_data1) >> iw_imm_val[4:0];
+                if (iw_imm_val >= `SIZE_DATA) begin
+                    r_result = {`SIZE_DATA{1'b0}};
+                    r_fl[`FLAG_V] = 1'b1;
+                end else begin
+                    r_result = $signed(r_tgt_val) >>> iw_imm_val[4:0];
+                    r_fl[`FLAG_V] = 1'b0;
+                end
+                r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
+                r_fl[`FLAG_N] = (r_result[`HBIT_DATA] == 1'b1) ? 1'b1 : 1'b0;
             end
-            `OPC_RS_CMPis: begin
+            `OPC_IS_CMPis: begin
                 reg signed [`HBIT_DATA:0] s_diff;
-                s_diff = $signed(iw_gp_read_data1) - $signed(r_se_imm_val);
-                r_fl[`FLAG_Z] = (iw_gp_read_data1 == r_se_imm_val) ? 1'b1 : 1'b0;
+                s_diff = $signed(r_tgt_val) - $signed(r_se_imm_val);
+                r_fl[`FLAG_Z] = (r_tgt_val == r_se_imm_val) ? 1'b1 : 1'b0;
                 r_fl[`FLAG_N] = (s_diff < 0) ? 1'b1 : 1'b0;
-                r_fl[`FLAG_V] = ((iw_gp_read_data1[`HBIT_DATA] ^ r_se_imm_val[`HBIT_DATA]) &
-                                 (iw_gp_read_data1[`HBIT_DATA] ^ s_diff[`HBIT_DATA]));
+                r_fl[`FLAG_V] = ((r_tgt_val[`HBIT_DATA] ^ r_se_imm_val[`HBIT_DATA]) &
+                                 (r_tgt_val[`HBIT_DATA] ^ s_diff[`HBIT_DATA]));
             end
             `OPC_S_LUI: begin
                 r_ui = iw_imm_val;
             end
             `OPC_S_SRMOV: begin
-                r_result = (iw_src_sr == `INDEX_PC) ? iw_pc : iw_sr_read_data1;
+                r_result = (iw_src_sr == `INDEX_PC) ? iw_pc : r_src_val;
             end
             default: begin
                 r_result = `SIZE_DATA'b0;
