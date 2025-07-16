@@ -12,7 +12,7 @@ module mem(
         integer i;
         for (i = 0; i < 4096; i = i + 1)
             r_mem[i] = 24'b0;
-        $readmemh("mem_init2.hex", r_mem);
+        $readmemh("mem_testset2.hex", r_mem);
     end
     always @(posedge iw_clk) begin
         if (iw_we) r_mem[iw_addr] <= iw_wdata;

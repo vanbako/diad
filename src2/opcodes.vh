@@ -25,7 +25,7 @@
 // REGISTER SIGNED
 `define OPC_RS_ADDs  8'h13
 `define OPC_RS_SUBs  8'h14
-`define OPC_RS_SHRs   8'h1A
+`define OPC_RS_SHRs  8'h1A
 `define OPC_RS_CMPs  8'h1B
 
 // IMMEDIATE
