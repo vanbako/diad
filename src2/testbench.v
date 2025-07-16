@@ -18,7 +18,7 @@ module testbench;
         r_rst = 1'b1;
         #10;
         r_rst = 1'b0;
-        repeat (20) @(posedge r_clk);
+        repeat (82) @(posedge r_clk);
         $finish;
     end
     integer tick = 0;
@@ -36,7 +36,7 @@ module testbench;
                  u_diad.w_wb_pc);
 `endif
 `ifdef DEBUGGP
-        $display("tick %03d : rst=%b GP  0=%h 1=%h 2=%h 3=%h 4=%h 5=%h 6=%h 7=%h",
+        $display("tick %03d : rst=%b GP  0=%h 1=%h 2=%h 3=%h 4=%h 5=%h 6=%h 7=%h 8=%h 9=%h a=%h b=%h c=%h d=%h e=%h f=%h",
                  tick, r_rst,
                  u_diad.u_reggp.r_gp[0],
                  u_diad.u_reggp.r_gp[1],
@@ -45,7 +45,15 @@ module testbench;
                  u_diad.u_reggp.r_gp[4],
                  u_diad.u_reggp.r_gp[5],
                  u_diad.u_reggp.r_gp[6],
-                 u_diad.u_reggp.r_gp[7]);
+                 u_diad.u_reggp.r_gp[7],
+                 u_diad.u_reggp.r_gp[8],
+                 u_diad.u_reggp.r_gp[9],
+                 u_diad.u_reggp.r_gp[10],
+                 u_diad.u_reggp.r_gp[11],
+                 u_diad.u_reggp.r_gp[12],
+                 u_diad.u_reggp.r_gp[13],
+                 u_diad.u_reggp.r_gp[14],
+                 u_diad.u_reggp.r_gp[15]);
 `endif
 `ifdef DEBUGINSTR
         $display("tick %03d : rst=%b INSTR                     IFID=%h IDEX=%h   EXMA=%h   MAMO=%h   MOWB=%h   WB=%h",

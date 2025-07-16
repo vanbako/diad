@@ -15,7 +15,7 @@ module reggp(
     integer i;
     always @(posedge iw_clk or posedge iw_rst) begin
         if (iw_rst) begin
-            for (i = 0; i < `HBIT_GP; i = i + 1)
+            for (i = 0; i <= `HBIT_GP; i = i + 1)
                 r_gp[i] <= `SIZE_DATA'b0;
         end else if (iw_write_enable) begin
             r_gp[iw_write_addr] <= iw_write_data;
