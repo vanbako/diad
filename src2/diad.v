@@ -5,9 +5,6 @@ module diad(
     input wire iw_clk,
     input wire iw_rst
 );
-    // reg [`HBIT_DATA:0] r_gp[`HBIT_GP:0];
-    reg [`HBIT_DATA:0] r_sr[`HBIT_SR:0];
-
     wire                w_mem_we;
     wire [`HBIT_ADDR:0] w_mem_addr;
     wire [`HBIT_DATA:0] w_mem_wdata;
@@ -22,6 +19,7 @@ module diad(
     );
 
     wire                w_ia_valid;
+    reg  [`HBIT_ADDR:0] r_ia_pc;
     wire [`HBIT_ADDR:0] w_iaif_pc;
     wire [`HBIT_ADDR:0] w_ifid_pc;
     wire [`HBIT_ADDR:0] w_idex_pc;
@@ -75,15 +73,16 @@ module diad(
         .iw_write_addr     (w_sr_write_addr),
         .iw_write_data     (w_sr_write_data),
         .iw_write_enable   (w_sr_write_enable),
-        .iw_write_pc       (w_sr_write_pc),
-        .iw_write_pc_enable(w_sr_write_pc_enable),
         .ow_read_data1     (w_sr_read_data1),
         .ow_read_data2     (w_sr_read_data2)
     );
 
     always @(posedge iw_clk or posedge iw_rst) begin
-        if (!iw_rst) begin
-            // r_sr[`INDEX_PC] <= r_sr[`INDEX_PC] + `SIZE_ADDR'd1;
+        if (iw_rst) begin
+            r_ia_pc <= `SIZE_ADDR'b0;
+        end
+        else begin
+            r_ia_pc <= r_ia_pc + `SIZE_ADDR'd1;
         end
     end
 
@@ -91,7 +90,7 @@ module diad(
         .iw_clk     (iw_clk),
         .iw_rst     (iw_rst),
         .ow_mem_addr(w_mem_addr),
-        // .iw_pc      (r_sr[`INDEX_PC]),
+        .iw_pc      (r_ia_pc),
         .ow_pc      (w_iaif_pc),
         .ow_ia_valid(w_ia_valid)
     );

@@ -49,6 +49,9 @@ module stg5wb(
                                ? 1'b1 : 1'b0;
     assign ow_gp_write_addr = iw_tgt_gp;
     assign ow_gp_write_data = iw_result;
+    assign ow_sr_write_enable = ( iw_opc == `OPC_S_SRMOV ) ? 1'b1 : 1'b0;
+    assign ow_sr_write_addr = iw_tgt_sr;
+    assign ow_sr_write_data = iw_result;
 
     reg [`HBIT_ADDR:0]   r_pc_latch;
     reg [`HBIT_DATA:0]   r_instr_latch;

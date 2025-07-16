@@ -24,9 +24,9 @@ module testbench;
     integer tick = 0;
     always @(posedge r_clk) begin
 `ifdef DEBUGPC
-        $display("tick %03d : rst=%b PC  IA=%h IAIF=%h IFID=%h IDEX=%h EXMA=%h MAMO=%h MOWB=%h WB=%h",
+        $display("tick %03d : rst=%b PC  IA=%h IAIF=%h IFID=%h IDEX=%h   EXMA=%h   MAMO=%h   MOWB=%h   WB=%h",
                  tick, r_rst,
-                 u_diad.r_sr[`INDEX_PC],
+                 u_diad.r_ia_pc,
                  u_diad.w_iaif_pc,
                  u_diad.w_ifid_pc,
                  u_diad.w_idex_pc,
@@ -48,7 +48,7 @@ module testbench;
                  u_diad.u_reggp.r_gp[7]);
 `endif
 `ifdef DEBUGINSTR
-        $display("tick %03d : rst=%b INSTR                     IFID=%h IDEX=%h EXMA=%h MAMO=%h MOWB=%h WB=%h",
+        $display("tick %03d : rst=%b INSTR                     IFID=%h IDEX=%h   EXMA=%h   MAMO=%h   MOWB=%h   WB=%h",
                  tick, r_rst,
                  u_diad.w_ifid_instr,
                  u_diad.w_idex_instr,
@@ -58,16 +58,16 @@ module testbench;
                  u_diad.w_wb_instr);
 `endif
 `ifdef DEBUGOPC
-        $display("tick %03d : rst=%b OPC                                   IDEX=%h     EXMA=%h     MAMO=%h     MOWB=%h     WB=%h",
+        $display("tick %03d : rst=%b OPC                                   IDEX=%-8s EXMA=%-8s MAMO=%-8s MOWB=%-8s WB=%-8s",
                  tick, r_rst,
-                 u_diad.w_opc,
-                 u_diad.w_exma_opc,
-                 u_diad.w_mamo_opc,
-                 u_diad.w_mowb_opc,
-                 u_diad.w_wb_opc);
+                 opc2str(u_diad.w_opc),
+                 opc2str(u_diad.w_exma_opc),
+                 opc2str(u_diad.w_mamo_opc),
+                 opc2str(u_diad.w_mowb_opc),
+                 opc2str(u_diad.w_wb_opc));
 `endif
 `ifdef DEBUGTGT_GP
-        $display("tick %03d : rst=%b TGT_GP                                IDEX=%h      EXMA=%h      MAMO=%h      MOWB=%h      WB=%h",
+        $display("tick %03d : rst=%b TGT_GP                                IDEX=%h        EXMA=%h        MAMO=%h        MOWB=%h        WB=%h",
                  tick, r_rst,
                  u_diad.w_tgt_gp,
                  u_diad.w_exma_tgt_gp,
@@ -76,7 +76,7 @@ module testbench;
                  u_diad.w_wb_tgt_gp);
 `endif
 `ifdef DEBUGTGT_SR
-        $display("tick %03d : rst=%b TGT_SR                                IDEX=%h      EXMA=%h      MAMO=%h      MOWB=%h      WB=%h",
+        $display("tick %03d : rst=%b TGT_SR                                IDEX=%h        EXMA=%h        MAMO=%h        MOWB=%h        WB=%h",
                  tick, r_rst,
                  u_diad.w_tgt_sr,
                  u_diad.w_exma_tgt_sr,
@@ -85,7 +85,7 @@ module testbench;
                  u_diad.w_wb_tgt_sr);
 `endif
 `ifdef DEBUGRESULT
-        $display("tick %03d : rst=%b RESULT                                            EXMA=%h MAMO=%h MOWB=%h WB=%h",
+        $display("tick %03d : rst=%b RESULT                                              EXMA=%h   MAMO=%h   MOWB=%h   WB=%h",
                  tick, r_rst,
                  u_diad.w_exma_result,
                  u_diad.w_mamo_result,
@@ -105,11 +105,6 @@ module testbench;
                  u_diad.w_tgt_sr,
                  u_diad.w_src_gp,
                  u_diad.w_src_sr);
-`endif
-`ifdef DEBUGEXECUTE
-        $display("tick %03d : rst=%b EXECUTE RES=%h",
-                 tick, r_rst,
-                 u_diad.w_exma_result);
 `endif
         tick = tick + 1;
     end
