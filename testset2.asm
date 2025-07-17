@@ -12,12 +12,20 @@ START:
     MOVis   #0x7FF, R2      ; maximum positive 12-bit value        ; 0011 0010 0010 0111 1111 1111 ; 3227ff
     MOVis   #-1,    R3      ; sign extended -1 -> 0xFFFFFF         ; 0011 0010 0011 1111 1111 1111 ; 323fff
 
+    NOP                     ; no operation                         ; 0000 0000 0000 0000 0000 0000 ; 000000
+    NOP                     ; no operation                         ; 0000 0000 0000 0000 0000 0000 ; 000000
+
     ; --- MOV register ---
     MOV     R2, R4          ; move positive value                  ; 0000 0010 0100 0010 0000 0000 ; 024200
     MOV     R3, R5          ; move negative value                  ; 0000 0010 0101 0011 0000 0000 ; 025300
 
     ; --- ADD unsigned ---
     MOVis   #1,    R6       ; prepare source                       ; 0011 0010 0110 0000 0000 0001 ; 326001
+
+    NOP                     ; no operation                         ; 0000 0000 0000 0000 0000 0000 ; 000000
+    NOP                     ; no operation                         ; 0000 0000 0000 0000 0000 0000 ; 000000
+    NOP                     ; no operation                         ; 0000 0000 0000 0000 0000 0000 ; 000000
+
     ADD     R6, R1          ; R1 was 0xFFFFFF -> test carry        ; 0000 0011 0001 0110 0000 0000 ; 031600
     ADD     R0, R2          ; 0 + 0x7FF -> normal                  ; 0000 0011 0010 0000 0000 0000 ; 032000
 
