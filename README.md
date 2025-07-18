@@ -26,7 +26,7 @@ Key pipeline stages are defined in `src/diad.v`:
 The project is written for Verilog-2001. A simple way to test the design is with Icarus Verilog:
 
 ```bash
-iverilog -g2012 -o test.vvp src/*.v
+iverilog -DMEM_HEX_FILE="\"mem_init2.hex\"" -g2012 -o test.vvp src/*.v
 vvp test.vvp
 ```
 
