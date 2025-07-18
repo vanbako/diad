@@ -117,12 +117,12 @@ module stg3ex(
                     (r_src_val[`HBIT_DATA-1] ^ r_result[`HBIT_DATA-1])) ? 1'b1 : 1'b0;
             end
             `OPC_RS_SUBs: begin
-                r_result = $signed(r_src_val) - $signed(r_tgt_val);
+                r_result = $signed(r_tgt_val) - $signed(r_src_val);
                 r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
                 r_fl[`FLAG_N] = ($signed(r_result) < 0) ? 1'b1 : 1'b0;
                 r_fl[`FLAG_V] =
                     ((r_src_val[`HBIT_DATA-1] ^ r_tgt_val[`HBIT_DATA-1]) &&
-                    (r_src_val[`HBIT_DATA-1] ^ r_result[`HBIT_DATA-1])) ? 1'b1 : 1'b0;
+                    (r_tgt_val[`HBIT_DATA-1] ^ r_result[`HBIT_DATA-1])) ? 1'b1 : 1'b0;
             end
             `OPC_RS_SHRs: begin
                 if (r_src_val >= `SIZE_DATA) begin
