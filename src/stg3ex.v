@@ -18,9 +18,13 @@ module stg3ex(
     input wire  [`HBIT_IMMSR:0]  iw_immsr_val,
     input wire  [`HBIT_CC:0]     iw_cc,
     input wire  [`HBIT_TGT_GP:0] iw_tgt_gp,
+    input wire                   iw_tgt_gp_we,
     output wire [`HBIT_TGT_GP:0] ow_tgt_gp,
+    output wire                  ow_tgt_gp_we,
     input wire  [`HBIT_TGT_SR:0] iw_tgt_sr,
+    input wire                   iw_tgt_sr_we,
     output wire [`HBIT_TGT_SR:0] ow_tgt_sr,
+    output wire                  ow_tgt_sr_we,
     input wire  [`HBIT_SRC_GP:0] iw_src_gp,
     input wire  [`HBIT_SRC_SR:0] iw_src_sr,
     output wire [`HBIT_TGT_GP:0] ow_gp_read_addr1,
@@ -250,7 +254,9 @@ module stg3ex(
     reg [`HBIT_DATA:0]   r_instr_latch;
     reg [`HBIT_OPC:0]    r_opc;
     reg [`HBIT_TGT_GP:0] r_tgt_gp;
+    reg                  r_tgt_gp_we;
     reg [`HBIT_TGT_SR:0] r_tgt_sr;
+    reg                  r_tgt_sr_we;
     reg [`HBIT_DATA:0]   r_result_latch;
     always @(posedge iw_clk or posedge iw_rst) begin
         if (iw_rst) begin
@@ -258,7 +264,9 @@ module stg3ex(
             r_instr_latch  <= `SIZE_DATA'b0;
             r_opc          <= `SIZE_OPC'b0;
             r_tgt_gp       <= `SIZE_TGT_GP'b0;
+            r_tgt_gp_we    <= 1'b0;
             r_tgt_sr       <= `SIZE_TGT_SR'b0;
+            r_tgt_sr_we    <= 1'b0;
             r_result_latch <= `SIZE_DATA'b0;
         end
         else begin
@@ -266,14 +274,18 @@ module stg3ex(
             r_instr_latch  <= iw_instr;
             r_opc          <= iw_opc;
             r_tgt_gp       <= iw_tgt_gp;
+            r_tgt_gp_we    <= iw_tgt_gp_we;
             r_tgt_sr       <= iw_tgt_sr;
+            r_tgt_sr_we    <= iw_tgt_sr_we;
             r_result_latch <= r_result;
         end
     end
-    assign ow_pc     = r_pc_latch;
-    assign ow_instr  = r_instr_latch;
-    assign ow_opc    = r_opc;
-    assign ow_tgt_gp = r_tgt_gp;
-    assign ow_tgt_sr = r_tgt_sr;
-    assign ow_result = r_result_latch;
+    assign ow_pc        = r_pc_latch;
+    assign ow_instr     = r_instr_latch;
+    assign ow_opc       = r_opc;
+    assign ow_tgt_gp    = r_tgt_gp;
+    assign ow_tgt_gp_we = r_tgt_gp_we;
+    assign ow_tgt_sr    = r_tgt_sr;
+    assign ow_tgt_sr_we = r_tgt_sr_we;
+    assign ow_result    = r_result_latch;
 endmodule
