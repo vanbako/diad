@@ -21,10 +21,18 @@ module stg3ex(
     input wire                   iw_tgt_gp_we,
     output wire [`HBIT_TGT_GP:0] ow_tgt_gp,
     output wire                  ow_tgt_gp_we,
+    input wire  [`HBIT_TGT_GP:0] iw_tgt_mamo_gp,
+    input wire                   iw_tgt_mamo_gp_we,
+    input wire  [`HBIT_TGT_GP:0] iw_tgt_mowb_gp,
+    input wire                   iw_tgt_mowb_gp_we,
     input wire  [`HBIT_TGT_SR:0] iw_tgt_sr,
     input wire                   iw_tgt_sr_we,
     output wire [`HBIT_TGT_SR:0] ow_tgt_sr,
     output wire                  ow_tgt_sr_we,
+    input wire  [`HBIT_TGT_SR:0] iw_tgt_mamo_sr,
+    input wire                   iw_tgt_mamo_sr_we,
+    input wire  [`HBIT_TGT_SR:0] iw_tgt_mowb_sr,
+    input wire                   iw_tgt_mowb_sr_we,
     input wire  [`HBIT_SRC_GP:0] iw_src_gp,
     input wire  [`HBIT_SRC_SR:0] iw_src_sr,
     output wire [`HBIT_TGT_GP:0] ow_gp_read_addr1,
@@ -35,7 +43,9 @@ module stg3ex(
     output wire [`HBIT_TGT_SR:0] ow_sr_read_addr2,
     input wire  [`HBIT_DATA:0]   iw_sr_read_data1,
     input wire  [`HBIT_DATA:0]   iw_sr_read_data2,
-    output wire [`HBIT_DATA:0]   ow_result
+    output wire [`HBIT_DATA:0]   ow_result,
+    input wire  [`HBIT_DATA:0]   iw_mamo_result,
+    input wire  [`HBIT_DATA:0]   iw_mowb_result
 );
     reg [`HBIT_IMM:0]  r_ui;
     reg [`HBIT_DATA:0] r_ir;
@@ -55,8 +65,24 @@ module stg3ex(
         r_result     = {`SIZE_DATA{1'b0}};
         r_ir         = {r_ui, iw_imm_val};
         r_se_imm_val = {{`SIZE_IMM{iw_imm_val[`HBIT_IMM]}}, iw_imm_val};
-        r_src_val    = iw_gp_read_data1;
-        r_tgt_val    = iw_gp_read_data2;
+        // r_src_val    = iw_gp_read_data1;
+        // r_tgt_val    = iw_gp_read_data2;
+        if (ow_tgt_gp_we && (ow_tgt_gp == iw_src_gp))
+            r_src_val = ow_result;
+        else if (iw_tgt_mamo_gp_we && (iw_tgt_mamo_gp == iw_src_gp))
+            r_src_val = iw_mamo_result;
+        else if (iw_tgt_mowb_gp_we && (iw_tgt_mowb_gp == iw_src_gp))
+            r_src_val = iw_mowb_result;
+        else
+            r_src_val = iw_gp_read_data1;
+        if (ow_tgt_gp_we && (ow_tgt_gp == iw_tgt_gp))
+            r_tgt_val = ow_result;
+        else if (iw_tgt_mamo_gp_we && (iw_tgt_mamo_gp == iw_tgt_gp))
+            r_tgt_val = iw_mamo_result;
+        else if (iw_tgt_mowb_gp_we && (iw_tgt_mowb_gp == iw_tgt_gp))
+            r_tgt_val = iw_mowb_result;
+        else
+            r_tgt_val = iw_gp_read_data2;
         case (iw_opc)
             `OPC_R_MOV: begin
                 r_result = r_src_val;
