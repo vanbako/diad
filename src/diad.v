@@ -112,9 +112,9 @@ module diad(
     wire [`HBIT_IMMSR:0]  w_immsr_val;
     wire [`HBIT_CC:0]     w_cc;
     wire [`HBIT_TGT_GP:0] w_tgt_gp;
-    wire [`HBIT_TGT_GP:0] w_tgt_gp_we;
+    wire                  w_tgt_gp_we;
     wire [`HBIT_TGT_SR:0] w_tgt_sr;
-    wire [`HBIT_TGT_SR:0] w_tgt_sr_we;
+    wire                  w_tgt_sr_we;
     wire [`HBIT_SRC_GP:0] w_src_gp;
     wire [`HBIT_SRC_SR:0] w_src_sr;
 
