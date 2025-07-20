@@ -100,6 +100,14 @@ module testbench;
                  u_diad.w_mowb_result,
                  u_diad.w_wb_result);
 `endif
+`ifdef DEBUGFLAGS
+        $display("tick %03d : rst=%b FLAGS zero=%s negative=%s carry=%s overflow=%s",
+                 tick, r_rst,
+                 (u_diad.u_stg3ex.r_fl[`FLAG_Z]) ? "yes" : "no ",
+                 (u_diad.u_stg3ex.r_fl[`FLAG_N]) ? "yes" : "no ",
+                 (u_diad.u_stg3ex.r_fl[`FLAG_C]) ? "yes" : "no ",
+                 (u_diad.u_stg3ex.r_fl[`FLAG_V]) ? "yes" : "no ");
+`endif
 `ifdef DEBUGDECODE
         $display("tick %03d : rst=%b DECODE OPC=%-8s SGN_EN=%b IMM_EN=%b IMM_VAL=%h IMMSR_VAL=%h CC=%2s TGT_GP=%h TGT_SR=%h SRC_GP=%h SRC_SR=%h",
                  tick, r_rst,

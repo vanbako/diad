@@ -66,7 +66,7 @@ module stg3ex(
             `OPC_R_SUB: begin
                 r_result = r_tgt_val - r_src_val;
                 r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
-                r_fl[`FLAG_C] = (r_src_val < r_tgt_val) ? 1'b1 : 1'b0;
+                r_fl[`FLAG_C] = (r_tgt_val < r_src_val) ? 1'b1 : 1'b0;
             end
             `OPC_R_NOT: begin
                 r_result = ~r_tgt_val;
@@ -201,12 +201,18 @@ module stg3ex(
             `OPC_IS_ADDis: begin
                 r_result = $signed(r_tgt_val) + $signed(r_se_imm_val);
                 r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
-                r_fl[`FLAG_C] = (r_result < r_tgt_val) ? 1'b1 : 1'b0;
+                r_fl[`FLAG_N] = ($signed(r_result) < 0) ? 1'b1 : 1'b0;
+                r_fl[`FLAG_V] =
+                    ((~(r_tgt_val[`HBIT_DATA-1] ^ r_se_imm_val[`HBIT_DATA-1])) &&
+                    (r_tgt_val[`HBIT_DATA-1] ^ r_result[`HBIT_DATA-1])) ? 1'b1 : 1'b0;
             end
             `OPC_IS_SUBis: begin
                 r_result = $signed(r_tgt_val) - $signed(r_se_imm_val);
                 r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
-                r_fl[`FLAG_C] = (r_tgt_val < r_se_imm_val) ? 1'b1 : 1'b0;
+                r_fl[`FLAG_N] = ($signed(r_result) < 0) ? 1'b1 : 1'b0;
+                r_fl[`FLAG_V] =
+                    ((r_se_imm_val[`HBIT_DATA-1] ^ r_tgt_val[`HBIT_DATA-1]) &&
+                    (r_tgt_val[`HBIT_DATA-1] ^ r_result[`HBIT_DATA-1])) ? 1'b1 : 1'b0;
             end
             `OPC_IS_SHRis: begin
                 if (iw_imm_val >= `SIZE_DATA) begin
