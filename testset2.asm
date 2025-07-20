@@ -179,11 +179,11 @@ START:
 
     ; --- CMPs signed ---
     CMPs    R3,  R5         ; compare negatives                    ; 0001 1011 0101 0011 0000 0000 ; 1b5300
-    CMPs    R2,  R6         ; compare mixed sign                   ; 0001 1011 0110 0010 0000 0000 ; 1b6200
+    CMPs    R2,  R6         ; compare mixed sign                   ; 0001 1011 0110 0010 0000 0000 ; 1b6200 ; tick 128  124
 
     ; --- CMPis signed immediate ---
     CMPis   #-1, R7         ; compare with -1                      ; 0011 1011 0111 1111 1111 1111 ; 3b7fff
-    CMPis   #0x7FF, R8      ; compare positive                     ; 0011 1011 1000 0111 1111 1111 ; 3b87ff
+    CMPis   #0x7FF, R8      ; compare positive                     ; 0011 1011 1000 0111 1111 1111 ; 3b87ff ; tick 130  126
 
     ; --- Special register operations ---
     LUI     #0x123          ; update IR                            ; 0100 0000 0000 0001 0010 0011 ; 400123
