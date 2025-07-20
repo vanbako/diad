@@ -1,12 +1,9 @@
-// flags.vh
-// Diad 24-bit RISC: Status flag bit definitions
 `ifndef FLAGS_VH
 `define FLAGS_VH
 
-// Bit positions in the 4-bit flag register
-`define FLAG_Z 3 // Zero flag
-`define FLAG_C 2 // Carry flag
-`define FLAG_N 1 // Negative flag
-`define FLAG_V 0 // Overflow flag
+`define FLAG_Z 0
+`define FLAG_N 1
+`define FLAG_C 2
+`define FLAG_V 3
 
-`endif // FLAGS_VH
+`endif

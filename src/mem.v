@@ -1,4 +1,4 @@
-`include "src2/sizes.vh"
+`include "src/sizes.vh"
 
 module mem(
     input wire               iw_clk,

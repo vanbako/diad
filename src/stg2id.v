@@ -1,5 +1,5 @@
-`include "src2/sizes.vh"
-`include "src2/opcodes.vh"
+`include "src/sizes.vh"
+`include "src/opcodes.vh"
 
 module stg2id(
     input wire                   iw_clk,

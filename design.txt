@@ -4,7 +4,7 @@ The main goal is to keep the pipeline as simple as possible and to avoid stalls 
 Toolchain is Vivado Lab Edition 2024.2, language verilog
 
 - Details
-FPGA: Artix-7, Board: Basys 3
+Board: OrangeCrab or ULX3S
 instructions, all memories, (GP) general purpose registers, (SSP) shadow stack pointer, (LR) link register, (PC) program counter, (IR) immediate register are diad (24 bit) in size
 floating points are not needed yet. They are for future extension
 no branch prediction, no out-of-order execution, no speculative execution, no interrupts, no exceptions, no cache, no TLB, no MMU
@@ -15,18 +15,17 @@ Each stage has its own local hazard or control logic that communicates with adja
 Use the built-in synchronous Block RAM (BRAM) for both instruction and data memories, single-ported. Make sure to use a one-clock delay (fetch, mem & wb stages)
 Memory initialisation is with a bootloader at runtime
 No memory controller yet
-Single clock domain
-Asynchronous Resets using the Artix-7 flip-flops to bring it in the clock domain
 
 - Instruction format
 24 bit (diad) total, only those needed for the instruction are coded
 [23-16] OPC opcode
-[15-12] BCC branch condition code (0 = RA, 1 = EQ, 2 = NE, 3 = LT, 4 = GT, 5 = LE, 6 = GE)
+[15-12] CC jump/branch condition code (0 = RA, 1 = EQ, 2 = NE, 3 = LT, 4 = GT, 5 = LE, 6 = GE)
 [15-12] TGT target general purpose register (16x GP)
-[15-12] TGT target special register (0 = PC, 1 = LR, 2 = IR, 3 = SSP)
+[15-12] TGT target special register (0 = FL, 1 = LR, 2 = IR, 3 = SSP, f = PC)
 [11-8]  SRC source general purpose register (16x GP)
-[11-8]  SRC source special register (0 = PC, 1 = LR, 2 = IR, 3 = SSP)
+[11-8]  SRC source special register (0 = FL, 1 = LR, 2 = IR, 3 = SSP, f = PC)
 [11-0]  IMM immediate value (12 bit) (goes to upper 12 bits of IR with the LUI instruction, lower 12 bits for all other instructions)
+[7-0]   IMMsr immediate value (8 bit) (lower 8 bits for SRJCC instruction)
 unused for the instruction:
 [x-y]   RSV reserved, must be all 0 (for the moment not checked, a check must be implemented when implementing interrupts where it should generate an illegal instruction interrupt if RSV bits are not 0)
 
@@ -37,7 +36,7 @@ Branch condition codes use some of the same bits as TGT, as TGT is not used in b
 
 i after the instruction means immediate value (upper from IR and lower from IMM)
 s after the instruction means signed operation
-is after the instruction means signed immediate operation (upper from IR and lower from IMM)
+is after the instruction means signed immediate operation (sign extended immediate, only lower 12 bits of immediate are used, upper 12 bits are ignored)
 
 In the assembly language, first operand is source, second operand is target.
 
@@ -63,25 +62,26 @@ OR Rs, Rt (bitwise or)
 ORi #imm, Rt (bitwise or full immediate)
 XOR Rs, Rt (bitwise xor)
 XORi #imm, Rt (bitwise xor full immediate)
-SL Rs, Rt (shift left)
-SLi #imm, Rt (shift left immediate, only lower 5 bits of the immediate are used)
-SR Rs, Rt (shift right)
-SRi #imm, Rt (shift right immediate, only lower 5 bits of the immediate are used)
-SRs Rs, Rt (shift right signed)
-SRis #imm, Rt (shift right signed immediate, only lower 5 bits of the immediate are used)
+SHL Rs, Rt (shift left)
+SHLi #imm, Rt (shift left immediate, only lower 5 bits of the immediate are used)
+SHR Rs, Rt (shift right)
+SHRi #imm, Rt (shift right immediate, only lower 5 bits of the immediate are used)
+SHRs Rs, Rt (shift right signed)
+SHRis #imm, Rt (shift right signed immediate, only lower 5 bits of the immediate are used)
 CMP Rs, Rt (compare)
 CMPi #imm, Rt (compare full immediate)
 CMPs Rs, Rt (compare signed)
 CMPis #imm, Rt (compare signed full immediate)
-BCC Rs (branch condition code, absolute address) (branch if condition is met)
-BCCi #imm (branch condition code full immediate, absolute address) (branch if condition is met)
+JCC Rs (jump condition code, absolute address) (jump if condition is met)
+JCCi #imm (jump condition code full immediate, absolute address) (jump if condition is met)
+BCC Rs (branch condition code, relative to pc) (branch if condition is met)
 BCCis #imm (branch condition code immediate signed, relative to pc only lower 12 bits of immediate) (branch if condition is met)
 LD (Rs), Rt (load from data memory)
 LDi (imm), Rt (load from data memory, full immediate address)
 ST Rs, (Rt) (store Rs to data memory at address in Rt)
 STi #imm, (Rt) (store full immediate to data memory at address in Rt)
 SRMOV PC, LR (store pc in link register)
-SRBCC LR+#imm (branch condition code to link register with immediate, only lower 12 bits of immediate are used) (branch if condition is met)
+SRJCC LR+#imm (jump condition code to link register with immediate, only lower 8 bits of immediate are used) (jump if condition is met)
 
 - Pipeline Stages
 1. IA/IF: Instruction Address & Fetch
@@ -98,12 +98,11 @@ PC  : program counter
 LR  : link register
 IR  : immediate register
 SSP : shadow stack pointer (not used yet)
-
-FL: flag register
-	zero
-	carry
-	negative
-	overflow
+FL  : flag register
+	0  Z zero
+	1  N negative
+	2  C carry
+	3  V overflow
 
 - signals
 	reset

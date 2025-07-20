@@ -1,7 +1,7 @@
 `ifndef CC_VH
 `define CC_VH
 
-`include "src2/sizes.vh"
+`include "src/sizes.vh"
 
 `define CC_RA 4'h0
 `define CC_EQ 4'h1

@@ -1,7 +1,7 @@
-`include "src2/sizes.vh"
-`include "src2/sr.vh"
-`include "src2/flags.vh"
-`include "src2/opcodes.vh"
+`include "src/sizes.vh"
+`include "src/sr.vh"
+`include "src/flags.vh"
+`include "src/opcodes.vh"
 
 module stg3ex(
     input wire                   iw_clk,

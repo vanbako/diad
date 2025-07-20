@@ -1,97 +1,127 @@
-// testbench.v
-// Basic simulation testbench for the Diad core.  The goal is simply
-// to exercise the pipeline and print out the program counter value at
-// every stage so that the flow through the pipeline can be observed.
-
 `timescale 1ns/1ps
 
+`include "src/opcodes.vh"
+`include "src/cc.vh"
+`include "src/sizes.vh"
+`include "src/sr.vh"
+
 module testbench;
-    // Clock and reset
-    reg clk;
-    reg rst;
-
-    // Instantiate the core
-    diad uut (
-        .clk(clk),
-        .rst(rst)
+    reg r_clk;
+    reg r_rst;
+    diad u_diad (
+        .iw_clk(r_clk),
+        .iw_rst(r_rst)
     );
-
-    // Generate an 8MHz clock -> 125ns period -> 62.5ns half period
-    initial clk = 1'b0;
-    always #62.5 clk = ~clk;
-
-    // Drive reset and finish after a number of cycles
+    initial r_clk = 1'b0;
+    always #5 r_clk = ~r_clk;
     initial begin
-        rst = 1'b1;
-        // Hold reset for two clock cycles
-        #250;
-        rst = 1'b0;
-
-        // Let the simulation run for some cycles
-        // Extended to 220 cycles so later instructions fully execute
-        repeat (220) @(posedge clk);
+        r_rst = 1'b1;
+        #10;
+        r_rst = 1'b0;
+        repeat (134) @(posedge r_clk);
         $finish;
     end
-
-    // Display reset and PC values on every tick
     integer tick = 0;
-    always @(posedge clk) begin
+    always @(posedge r_clk) begin
 `ifdef DEBUGPC
-        $display("tick %0d : rst=%b IA=%h IAIF=%h IFID=%h IDEX=%h EXMA=%h MAMO=%h MORA=%h RARO=%h FINAL=%h",
-                 tick, rst,
-                 uut.ia_pc,
-                 uut.iaif_pc,
-                 uut.ifid_pc,
-                 uut.idex_pc,
-                 uut.exma_pc,
-                 uut.mamo_pc,
-                 uut.mora_pc,
-                 uut.raro_pc,
-                 uut.final_pc);
+        $display("tick %03d : rst=%b PC  IA=%h IAIF=%h IFID=%h IDEX=%h   EXMA=%h   MAMO=%h   MOWB=%h   WB=%h",
+                 tick, r_rst,
+                 u_diad.r_ia_pc,
+                 u_diad.w_iaif_pc,
+                 u_diad.w_ifid_pc,
+                 u_diad.w_idex_pc,
+                 u_diad.w_exma_pc,
+                 u_diad.w_mamo_pc,
+                 u_diad.w_mowb_pc,
+                 u_diad.w_wb_pc);
+`endif
+`ifdef DEBUGGP
+        $display("tick %03d : rst=%b GP  0=%h 1=%h 2=%h 3=%h 4=%h 5=%h 6=%h 7=%h 8=%h 9=%h a=%h b=%h c=%h d=%h e=%h f=%h",
+                 tick, r_rst,
+                 u_diad.u_reggp.r_gp[0],
+                 u_diad.u_reggp.r_gp[1],
+                 u_diad.u_reggp.r_gp[2],
+                 u_diad.u_reggp.r_gp[3],
+                 u_diad.u_reggp.r_gp[4],
+                 u_diad.u_reggp.r_gp[5],
+                 u_diad.u_reggp.r_gp[6],
+                 u_diad.u_reggp.r_gp[7],
+                 u_diad.u_reggp.r_gp[8],
+                 u_diad.u_reggp.r_gp[9],
+                 u_diad.u_reggp.r_gp[10],
+                 u_diad.u_reggp.r_gp[11],
+                 u_diad.u_reggp.r_gp[12],
+                 u_diad.u_reggp.r_gp[13],
+                 u_diad.u_reggp.r_gp[14],
+                 u_diad.u_reggp.r_gp[15]);
 `endif
 `ifdef DEBUGINSTR
-        $display("tick %0d : IFID_instr=%h IDEX_instr=%h EXMA_instr=%h MAMO_instr=%h MORA_instr=%h RARO_instr=%h FINAL_instr=%h",
-                 tick,
-                 uut.ifid_instr,
-                 uut.idex_instr,
-                 uut.exma_instr,
-                 uut.mamo_instr,
-                 uut.mora_instr,
-                 uut.raro_instr,
-                 uut.final_instr);
+        $display("tick %03d : rst=%b INSTR                     IFID=%h IDEX=%h   EXMA=%h   MAMO=%h   MOWB=%h   WB=%h",
+                 tick, r_rst,
+                 u_diad.w_ifid_instr,
+                 u_diad.w_idex_instr,
+                 u_diad.w_exma_instr,
+                 u_diad.w_mamo_instr,
+                 u_diad.w_mowb_instr,
+                 u_diad.w_wb_instr);
 `endif
-`ifdef DEBUGRES
-        $display("tick %0d : EX_res=%h MA_res=%h MO_res=%h RA_res=%h RO_res=%h WE=%b WADDR=%h",
-                 tick,
-                 uut.ex_result,
-                 uut.ma_result,
-                 uut.mo_result,
-                 uut.ra_result,
-                 uut.ro_result,
-                 uut.reg_we,
-                 uut.reg_waddr);
+`ifdef DEBUGOPC
+        $display("tick %03d : rst=%b OPC                                   IDEX=%-8s EXMA=%-8s MAMO=%-8s MOWB=%-8s WB=%-8s",
+                 tick, r_rst,
+                 opc2str(u_diad.w_opc),
+                 opc2str(u_diad.w_exma_opc),
+                 opc2str(u_diad.w_mamo_opc),
+                 opc2str(u_diad.w_mowb_opc),
+                 opc2str(u_diad.w_wb_opc));
 `endif
-`ifdef DEBUGIR
-        $display("tick %0d : IR=%h",
-                 tick,
-                 uut.u_stage3ex.ir_reg);
+`ifdef DEBUGTGT_GP
+        $display("tick %03d : rst=%b TGT_GP                                IDEX=%h        EXMA=%h        MAMO=%h        MOWB=%h        WB=%h",
+                 tick, r_rst,
+                 u_diad.w_tgt_gp,
+                 u_diad.w_exma_tgt_gp,
+                 u_diad.w_mamo_tgt_gp,
+                 u_diad.w_mowb_tgt_gp,
+                 u_diad.w_wb_tgt_gp);
 `endif
-`ifdef DEBUGLR
-        $display("tick %0d : LR=%h WE=%b WDATA=%h",
-                 tick,
-                 uut.lr_out,
-                 uut.lr_we,
-                 uut.lr_wdata);
+`ifdef DEBUGTGT_SR
+        $display("tick %03d : rst=%b TGT_SR                                IDEX=%h        EXMA=%h        MAMO=%h        MOWB=%h        WB=%h",
+                 tick, r_rst,
+                 u_diad.w_tgt_sr,
+                 u_diad.w_exma_tgt_sr,
+                 u_diad.w_mamo_tgt_sr,
+                 u_diad.w_mowb_tgt_sr,
+                 u_diad.w_wb_tgt_sr);
 `endif
-`ifdef DEBUGREG
-        $display("tick %0d : R0=%h R1=%h R2=%h R3=%h",
-                 tick,
-                 uut.u_reggp.regs[0],
-                 uut.u_reggp.regs[1],
-                 uut.u_reggp.regs[2],
-                 uut.u_reggp.regs[3]);
+`ifdef DEBUGRESULT
+        $display("tick %03d : rst=%b RESULT                                              EXMA=%h   MAMO=%h   MOWB=%h   WB=%h",
+                 tick, r_rst,
+                 u_diad.w_exma_result,
+                 u_diad.w_mamo_result,
+                 u_diad.w_mowb_result,
+                 u_diad.w_wb_result);
+`endif
+`ifdef DEBUGFLAGS
+        $display("tick %03d : rst=%b FLAGS zero=%s negative=%s carry=%s overflow=%s",
+                 tick, r_rst,
+                 (u_diad.u_stg3ex.r_fl[`FLAG_Z]) ? "yes" : "no ",
+                 (u_diad.u_stg3ex.r_fl[`FLAG_N]) ? "yes" : "no ",
+                 (u_diad.u_stg3ex.r_fl[`FLAG_C]) ? "yes" : "no ",
+                 (u_diad.u_stg3ex.r_fl[`FLAG_V]) ? "yes" : "no ");
+`endif
+`ifdef DEBUGDECODE
+        $display("tick %03d : rst=%b DECODE OPC=%-8s SGN_EN=%b IMM_EN=%b IMM_VAL=%h IMMSR_VAL=%h CC=%2s TGT_GP=%h TGT_SR=%h SRC_GP=%h SRC_SR=%h",
+                 tick, r_rst,
+                 opc2str(u_diad.w_opc),
+                 u_diad.w_sgn_en,
+                 u_diad.w_imm_en,
+                 u_diad.w_imm_val,
+                 u_diad.w_immsr_val,
+                 cc2str(u_diad.w_cc),
+                 u_diad.w_tgt_gp,
+                 u_diad.w_tgt_sr,
+                 u_diad.w_src_gp,
+                 u_diad.w_src_sr);
 `endif
         tick = tick + 1;
     end
-
 endmodule

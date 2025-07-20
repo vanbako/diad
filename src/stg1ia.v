@@ -1,4 +1,4 @@
-`include "src2/sizes.vh"
+`include "src/sizes.vh"
 
 module stg1ia(
     input wire                 iw_clk,
