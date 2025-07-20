@@ -104,40 +104,54 @@ START:
     ANDi    #0,    R2       ; result zero                          ; 0010 0110 0010 0000 0000 0000 ; 262000
 
     ; --- OR ---
-    OR      R11, R3         ; -1 OR 0xF0 -> -1                     ; 0000 0111 0011 1011 0000 0000 ; 073b00 ; tick 77
+    NOP                     ; no operation                         ; 0000 0000 0000 0000 0000 0000 ; 000000
+    OR      R11, R3         ; -1 OR 0xF0 -> -1                     ; 0000 0111 0011 1011 0000 0000 ; 073b00 ; tick 78
     OR      R12, R4         ; value | 0 -> unchanged               ; 0000 0111 0100 1100 0000 0000 ; 074c00
 
     ; --- ORi ---
     ORi     #0xF0, R0       ; set high bits                        ; 0010 0111 0000 0000 1111 0000 ; 2700f0
-    ORi     #0,    R6       ; no change                            ; 0010 0111 0110 0000 0000 0000 ; 276000
+    ORi     #0,    R6       ; no change                            ; 0010 0111 0110 0000 0000 0000 ; 276000 ; tick 81
 
     ; --- XOR ---
+    NOP                     ; no operation                         ; 0000 0000 0000 0000 0000 0000 ; 000000
     XOR     R11, R4         ; mix values                           ; 0000 1000 0100 1011 0000 0000 ; 084b00
-    XOR     R12, R5         ; value XOR 0 -> same                  ; 0000 1000 0101 1100 0000 0000 ; 085c00
+    XOR     R12, R5         ; value XOR 0 -> same                  ; 0000 1000 0101 1100 0000 0000 ; 085c00 ; tick 84
 
     ; --- XORi ---
     XORi    #0xFF, R1       ; toggle low byte                      ; 0010 1000 0001 0000 ffff ffff ; 2810ff
-    XORi    #0,    R2       ; unchanged                            ; 0010 1000 0010 0000 0000 0000 ; 282000
+    XORi    #0,    R2       ; unchanged                            ; 0010 1000 0010 0000 0000 0000 ; 282000 ; tick 86
 
     ; --- SHL ---
     MOVis   #1,    R13      ; shift amount 1                       ; 0011 0010 1101 0000 0000 0001 ; 32d001
-    SHL     R13, R4         ; simple shift                         ; 0000 1001 0100 1101 0000 0000 ; 094d00
+    NOP                     ; no operation                         ; 0000 0000 0000 0000 0000 0000 ; 000000
+    NOP                     ; no operation                         ; 0000 0000 0000 0000 0000 0000 ; 000000
+    NOP                     ; no operation                         ; 0000 0000 0000 0000 0000 0000 ; 000000
+    SHL     R13, R4         ; simple shift                         ; 0000 1001 0100 1101 0000 0000 ; 094d00 ; tick 91
     MOVis   #0x20, R14      ; 32 >= width -> overflow              ; 0011 0010 1110 0000 0010 0000 ; 32e020
-    SHL     R14, R5         ; result zero, V flag                  ; 0000 1001 0101 1110 0000 0000 ; 095e00
+    NOP                     ; no operation                         ; 0000 0000 0000 0000 0000 0000 ; 000000
+    NOP                     ; no operation                         ; 0000 0000 0000 0000 0000 0000 ; 000000
+    NOP                     ; no operation                         ; 0000 0000 0000 0000 0000 0000 ; 000000
+    SHL     R14, R5         ; result zero, V flag                  ; 0000 1001 0101 1110 0000 0000 ; 095e00 ; tick 96
 
     ; --- SHLi ---
     SHLi    #4,  R6         ; left by 4                            ; 0010 1001 0110 0000 0000 0100 ; 296004
-    SHLi    #0x20, R7       ; left by 32 -> zero                   ; 0010 1001 0111 0000 0010 0000 ; 297020
+    SHLi    #0x20, R7       ; left by 32 -> zero                   ; 0010 1001 0111 0000 0010 0000 ; 297020 ; tick 98
 
     ; --- SHR ---
     MOVis   #4,    R15      ; shift amount 4                       ; 0011 0010 1111 0000 0000 0100 ; 32f004
-    SHR     R15, R4         ; right shift                          ; 0000 1010 0100 1111 0000 0000 ; 0a4f00
+    NOP                     ; no operation                         ; 0000 0000 0000 0000 0000 0000 ; 000000
+    NOP                     ; no operation                         ; 0000 0000 0000 0000 0000 0000 ; 000000
+    NOP                     ; no operation                         ; 0000 0000 0000 0000 0000 0000 ; 000000
+    SHR     R15, R4         ; right shift                          ; 0000 1010 0100 1111 0000 0000 ; 0a4f00 ; tick 103
     MOVis   #0x20, R0       ; >= width                             ; 0011 0010 0000 0000 0010 0000 ; 320020
-    SHR     R0,  R5         ; result zero                          ; 0000 1010 0101 0000 0000 0000 ; 0a5000
+    NOP                     ; no operation                         ; 0000 0000 0000 0000 0000 0000 ; 000000
+    NOP                     ; no operation                         ; 0000 0000 0000 0000 0000 0000 ; 000000
+    NOP                     ; no operation                         ; 0000 0000 0000 0000 0000 0000 ; 000000
+    SHR     R0,  R5         ; result zero                          ; 0000 1010 0101 0000 0000 0000 ; 0a5000 ; tick 108
 
     ; --- SHRi ---
     SHRi    #4,  R6         ; right by 4                           ; 0010 1010 0110 0000 0000 0100 ; 2a6004
-    SHRi    #0x20, R7       ; right by 32 -> zero                  ; 0010 1010 0111 0000 0010 0000 ; 2a7020
+    SHRi    #0x20, R7       ; right by 32 -> zero                  ; 0010 1010 0111 0000 0010 0000 ; 2a7020 ; tick 110
 
     ; --- SHRs signed ---
     MOVis   #1,   R8        ; shift amount                         ; 0011 0010 1000 0000 0000 0001 ; 328001
