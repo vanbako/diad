@@ -39,7 +39,6 @@
 `define OPC_I_SHRi   8'h2A
 `define OPC_I_CMPi   8'h2B
 `define OPC_I_JCCi   8'h2C
-`define OPC_I_LDi    8'h2E
 `define OPC_I_STi    8'h2F
 
 // IMMEDIATE SIGNED
@@ -49,6 +48,7 @@
 `define OPC_IS_SHRis 8'h3A
 `define OPC_IS_CMPis 8'h3B
 `define OPC_IS_BCCis 8'h3D
+`define OPC_IS_STis  8'h3F
 
 // SPECIAL
 `define OPC_S_LUI    8'h40
@@ -89,7 +89,6 @@ function automatic [79:0] opc2str;
             `OPC_I_SHRi:   opc2str = "I_SHRi";
             `OPC_I_CMPi:   opc2str = "I_CMPi";
             `OPC_I_JCCi:   opc2str = "I_JCCi";
-            `OPC_I_LDi:    opc2str = "I_LDi";
             `OPC_I_STi:    opc2str = "I_STi";
             `OPC_IS_MOVis: opc2str = "IS_MOVis";
             `OPC_IS_ADDis: opc2str = "IS_ADDis";
@@ -97,6 +96,7 @@ function automatic [79:0] opc2str;
             `OPC_IS_SHRis: opc2str = "IS_SHRis";
             `OPC_IS_CMPis: opc2str = "IS_CMPis";
             `OPC_IS_BCCis: opc2str = "IS_BCCis";
+            `OPC_I_STis:   opc2str = "I_STis";
             `OPC_S_LUI:    opc2str = "S_LUI";
             `OPC_S_SRMOV:  opc2str = "S_SRMOV";
             `OPC_S_SRJCC:  opc2str = "S_SRJCC";
