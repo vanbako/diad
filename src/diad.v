@@ -157,6 +157,7 @@ module diad(
     wire                  w_exma_tgt_gp_we;
     wire [`HBIT_TGT_SR:0] w_exma_tgt_sr;
     wire                  w_exma_tgt_sr_we;
+    wire [`HBIT_ADDR:0]   w_exma_addr;
     wire [`HBIT_DATA:0]   w_exma_result;
 
     wire [`HBIT_OPC:0]    w_mamo_opc;
@@ -213,6 +214,7 @@ module diad(
         .ow_sr_read_addr2 (w_sr_read_addr2),
         .iw_sr_read_data1 (w_sr_read_data1),
         .iw_sr_read_data2 (w_sr_read_data2),
+        .ow_addr          (w_exma_addr),
         .ow_result        (w_exma_result),
         .iw_mamo_result   (w_mamo_result),
         .iw_mowb_result   (w_mowb_result)
@@ -235,6 +237,8 @@ module diad(
         .iw_tgt_sr_we(w_exma_tgt_sr_we),
         .ow_tgt_sr   (w_mamo_tgt_sr),
         .ow_tgt_sr_we(w_mamo_tgt_sr_we),
+        .ow_mem_addr (w_dmem_addr),
+        .iw_addr     (w_exma_addr),
         .iw_result   (w_exma_result),
         .ow_result   (w_mamo_result)
     );
@@ -256,6 +260,9 @@ module diad(
         .iw_tgt_sr_we(w_mamo_tgt_sr_we),
         .ow_tgt_sr   (w_mowb_tgt_sr),
         .ow_tgt_sr_we(w_mowb_tgt_sr_we),
+        .ow_mem_we   (w_dmem_we),
+        .ow_mem_wdata(w_dmem_wdata),
+        .iw_mem_rdata(w_dmem_rdata),
         .iw_result   (w_mamo_result),
         .ow_result   (w_mowb_result)
     );

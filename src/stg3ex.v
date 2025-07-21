@@ -43,6 +43,7 @@ module stg3ex(
     output wire [`HBIT_TGT_SR:0] ow_sr_read_addr2,
     input wire  [`HBIT_DATA:0]   iw_sr_read_data1,
     input wire  [`HBIT_DATA:0]   iw_sr_read_data2,
+    output wire [`HBIT_ADDR:0]   ow_addr,
     output wire [`HBIT_DATA:0]   ow_result,
     input wire  [`HBIT_DATA:0]   iw_mamo_result,
     input wire  [`HBIT_DATA:0]   iw_mowb_result
@@ -50,6 +51,7 @@ module stg3ex(
     reg [`HBIT_IMM:0]  r_ui;
     reg [`HBIT_DATA:0] r_ir;
     reg [`HBIT_DATA:0] r_se_imm_val;
+    reg [`HBIT_ADDR:0] r_addr;
     reg [`HBIT_DATA:0] r_result;
     reg [`HBIT_FLAG:0] r_fl;
     reg [`HBIT_DATA:0] r_src_gp_val;
@@ -64,6 +66,7 @@ module stg3ex(
 
     always @* begin
         r_fl         = {`SIZE_FLAG{1'b0}};
+        r_addr       = {`SIZE_ADDR{1'b0}};
         r_result     = {`SIZE_DATA{1'b0}};
         r_ir         = {r_ui, iw_imm_val};
         r_se_imm_val = {{`SIZE_IMM{iw_imm_val[`HBIT_IMM]}}, iw_imm_val};;
@@ -153,6 +156,13 @@ module stg3ex(
             `OPC_R_CMP: begin
                 r_fl[`FLAG_Z] = (r_src_gp_val == r_tgt_gp_val) ? 1'b1 : 1'b0;
                 r_fl[`FLAG_C] = (r_src_gp_val < r_tgt_gp_val) ? 1'b1 : 1'b0;
+            end
+            `OPC_R_LD: begin
+                r_addr = r_src_gp_val;
+            end
+            `OPC_R_ST: begin
+                r_addr = r_tgt_gp_val;
+                r_result = r_src_gp_val;
             end
             `OPC_RS_ADDs: begin
                 r_result = $signed(r_src_gp_val) + $signed(r_tgt_gp_val);
@@ -299,6 +309,7 @@ module stg3ex(
     reg                  r_tgt_gp_we;
     reg [`HBIT_TGT_SR:0] r_tgt_sr;
     reg                  r_tgt_sr_we;
+    reg [`HBIT_ADDR:0]   r_addr_latch;
     reg [`HBIT_DATA:0]   r_result_latch;
     always @(posedge iw_clk or posedge iw_rst) begin
         if (iw_rst) begin
@@ -309,6 +320,7 @@ module stg3ex(
             r_tgt_gp_we    <= 1'b0;
             r_tgt_sr       <= `SIZE_TGT_SR'b0;
             r_tgt_sr_we    <= 1'b0;
+            r_addr_latch   <= `SIZE_ADDR'b0;
             r_result_latch <= `SIZE_DATA'b0;
         end
         else begin
@@ -319,6 +331,7 @@ module stg3ex(
             r_tgt_gp_we    <= iw_tgt_gp_we;
             r_tgt_sr       <= iw_tgt_sr;
             r_tgt_sr_we    <= iw_tgt_sr_we;
+            r_addr_latch   <= r_addr;
             r_result_latch <= r_result;
         end
     end
@@ -329,5 +342,6 @@ module stg3ex(
     assign ow_tgt_gp_we = r_tgt_gp_we;
     assign ow_tgt_sr    = r_tgt_sr;
     assign ow_tgt_sr_we = r_tgt_sr_we;
+    assign ow_addr      = r_addr_latch;
     assign ow_result    = r_result_latch;
 endmodule

@@ -17,6 +17,9 @@ module stg4mo(
     input wire                   iw_tgt_sr_we,
     output wire [`HBIT_TGT_SR:0] ow_tgt_sr,
     output wire                  ow_tgt_sr_we,
+    output wire                  ow_mem_we,
+    output wire [`HBIT_DATA:0]   ow_mem_wdata,
+    input wire  [`HBIT_DATA:0]   iw_mem_rdata,
     input wire  [`HBIT_DATA:0]   iw_result,
     output wire [`HBIT_DATA:0]   ow_result
 );

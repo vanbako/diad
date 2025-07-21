@@ -17,6 +17,8 @@ module stg4ma(
     input wire                   iw_tgt_sr_we,
     output wire [`HBIT_TGT_SR:0] ow_tgt_sr,
     output wire                  ow_tgt_sr_we,
+    output wire [`HBIT_ADDR:0]   ow_mem_addr,
+    input wire  [`HBIT_ADDR:0]   iw_addr,
     input wire  [`HBIT_DATA:0]   iw_result,
     output wire [`HBIT_DATA:0]   ow_result
 );
