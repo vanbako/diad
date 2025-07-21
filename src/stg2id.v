@@ -38,7 +38,7 @@ module stg2id(
         (w_opc == `OPC_IS_MOVis) || (w_opc == `OPC_IS_ADDis) ||
         (w_opc == `OPC_IS_SUBis) || (w_opc == `OPC_IS_SHRis) ||
         (w_opc == `OPC_IS_CMPis) || (w_opc == `OPC_IS_BCCis) ||
-        (w_opc == `OPC_I_STis)   ||(w_opc == `OPC_S_LUI);
+        (w_opc == `OPC_IS_STis)  || (w_opc == `OPC_S_LUI);
     wire w_is_branch =
         (w_opc == `OPC_R_JCC)    || (w_opc == `OPC_R_BCC)    ||
         (w_opc == `OPC_I_JCCi)   || (w_opc == `OPC_IS_BCCis) ||

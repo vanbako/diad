@@ -18,7 +18,7 @@ module testbench;
         r_rst = 1'b1;
         #10;
         r_rst = 1'b0;
-        repeat (134) @(posedge r_clk);
+        repeat (90) @(posedge r_clk);
         $finish;
     end
     integer tick = 0;

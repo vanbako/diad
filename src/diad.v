@@ -5,17 +5,30 @@ module diad(
     input wire iw_clk,
     input wire iw_rst
 );
-    wire                w_mem_we;
-    wire [`HBIT_ADDR:0] w_mem_addr;
-    wire [`HBIT_DATA:0] w_mem_wdata;
-    wire [`HBIT_DATA:0] w_mem_rdata;
+    wire                w_imem_we;
+    wire [`HBIT_ADDR:0] w_imem_addr;
+    wire [`HBIT_DATA:0] w_imem_wdata;
+    wire [`HBIT_DATA:0] w_imem_rdata;
 
-    mem u_mem(
+    mem #(.READ_MEM(1)) u_imem(
         .iw_clk  (iw_clk),
-        .iw_we   (w_mem_we),
-        .iw_addr (w_mem_addr),
-        .iw_wdata(w_mem_wdata),
-        .or_rdata(w_mem_rdata)
+        .iw_we   (w_imem_we),
+        .iw_addr (w_imem_addr),
+        .iw_wdata(w_imem_wdata),
+        .or_rdata(w_imem_rdata)
+    );
+
+    wire                w_dmem_we;
+    wire [`HBIT_ADDR:0] w_dmem_addr;
+    wire [`HBIT_DATA:0] w_dmem_wdata;
+    wire [`HBIT_DATA:0] w_dmem_rdata;
+
+    mem #(.READ_MEM(0)) u_dmem(
+        .iw_clk  (iw_clk),
+        .iw_we   (w_dmem_we),
+        .iw_addr (w_dmem_addr),
+        .iw_wdata(w_dmem_wdata),
+        .or_rdata(w_dmem_rdata)
     );
 
     wire                w_ia_valid;
@@ -89,7 +102,7 @@ module diad(
     stg1ia u_stg1ia(
         .iw_clk     (iw_clk),
         .iw_rst     (iw_rst),
-        .ow_mem_addr(w_mem_addr),
+        .ow_mem_addr(w_imem_addr),
         .iw_pc      (r_ia_pc),
         .ow_pc      (w_iaif_pc),
         .ow_ia_valid(w_ia_valid)
@@ -98,7 +111,7 @@ module diad(
     stg1if u_stg1if(
         .iw_clk     (iw_clk),
         .iw_rst     (iw_rst),
-        .iw_mem_data(w_mem_rdata),
+        .iw_mem_data(w_imem_rdata),
         .iw_ia_valid(w_ia_valid),
         .iw_pc      (w_iaif_pc),
         .ow_pc      (w_ifid_pc),

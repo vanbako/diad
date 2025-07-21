@@ -96,7 +96,7 @@ function automatic [79:0] opc2str;
             `OPC_IS_SHRis: opc2str = "IS_SHRis";
             `OPC_IS_CMPis: opc2str = "IS_CMPis";
             `OPC_IS_BCCis: opc2str = "IS_BCCis";
-            `OPC_I_STis:   opc2str = "I_STis";
+            `OPC_IS_STis:  opc2str = "IS_STis";
             `OPC_S_LUI:    opc2str = "S_LUI";
             `OPC_S_SRMOV:  opc2str = "S_SRMOV";
             `OPC_S_SRJCC:  opc2str = "S_SRJCC";
