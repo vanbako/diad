@@ -12,8 +12,8 @@ START:
     MOVis   #0x7FF, R2      ; maximum positive 12-bit value        ; 0011 0010 0010 0111 1111 1111 ; 3227ff
     MOVis   #-1,    R3      ; sign extended -1 -> 0xFFFFFF         ; 0011 0010 0011 1111 1111 1111 ; 323fff ; tick  13
 
-    NOP                     ; no operation                         ; 0000 0000 0000 0000 0000 0000 ; 000000
-    NOP                     ; no operation                         ; 0000 0000 0000 0000 0000 0000 ; 000000
+    NOP                     ; no operation                         ; 0000 0000 0000 0000 0000 0000 ; 000000 ; tick  14
+    NOP                     ; no operation                         ; 0000 0000 0000 0000 0000 0000 ; 000000 ; tick  15
 
     ; --- MOV register ---
     MOV     R2, R4          ; move positive value                  ; 0000 0010 0100 0010 0000 0000 ; 024200
@@ -22,9 +22,9 @@ START:
     ; --- ADD unsigned ---
     MOVis   #1,    R6       ; prepare source                       ; 0011 0010 0110 0000 0000 0001 ; 326001
 
+    NOP                     ; no operation                         ; 0000 0000 0000 0000 0000 0000 ; 000000 ; tick  19
     NOP                     ; no operation                         ; 0000 0000 0000 0000 0000 0000 ; 000000
-    NOP                     ; no operation                         ; 0000 0000 0000 0000 0000 0000 ; 000000
-    NOP                     ; no operation                         ; 0000 0000 0000 0000 0000 0000 ; 000000
+    NOP                     ; no operation                         ; 0000 0000 0000 0000 0000 0000 ; 000000 ; tick  21
 
     ADD     R6, R1          ; R1 was 0xFFFFFF -> test carry        ; 0000 0011 0001 0110 0000 0000 ; 031600 ; tick  22   18
     ADD     R0, R2          ; 0 + 0x7FF -> normal                  ; 0000 0011 0010 0000 0000 0000 ; 032000
@@ -34,9 +34,9 @@ START:
     ; --- ADDi unsigned immediate ---
     ADDi    #1,  R2         ; add small value                      ; 0010 0011 0010 0000 0000 0001 ; 232001 ; tick  25   21
     MOVis   #-1, R1         ; sign extended -1 -> 0xFFFFFF         ; 0011 0010 0001 1111 1111 1111 ; 321fff
+    NOP                     ; no operation                         ; 0000 0000 0000 0000 0000 0000 ; 000000 ; tick  27
     NOP                     ; no operation                         ; 0000 0000 0000 0000 0000 0000 ; 000000
-    NOP                     ; no operation                         ; 0000 0000 0000 0000 0000 0000 ; 000000
-    NOP                     ; no operation                         ; 0000 0000 0000 0000 0000 0000 ; 000000
+    NOP                     ; no operation                         ; 0000 0000 0000 0000 0000 0000 ; 000000 ; tick  29
     ADDi    #1,  R1         ; add 1 to 0xFFFFFF -> wrap/carry      ; 0010 0011 0001 0000 0000 0001 ; 231001 ; tick  30   26
 
     ; --- ADDs signed ---
