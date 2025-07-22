@@ -2,6 +2,7 @@
 `include "src/sr.vh"
 `include "src/flags.vh"
 `include "src/opcodes.vh"
+`include "src/cc.vh"
 
 module stg3ex(
     input wire                   iw_clk,
@@ -46,11 +47,14 @@ module stg3ex(
     output wire [`HBIT_ADDR:0]   ow_addr,
     output wire [`HBIT_DATA:0]   ow_result,
     input wire  [`HBIT_DATA:0]   iw_mamo_result,
-    input wire  [`HBIT_DATA:0]   iw_mowb_result
+    input wire  [`HBIT_DATA:0]   iw_mowb_result,
+    output reg                   or_branch_taken,
+    output reg  [`HBIT_ADDR:0]   or_branch_pc
 );
     reg [`HBIT_IMM:0]  r_ui;
     reg [`HBIT_DATA:0] r_ir;
     reg [`HBIT_DATA:0] r_se_imm_val;
+    reg [`HBIT_DATA:0] r_se_immsr_val;
     reg [`HBIT_ADDR:0] r_addr;
     reg [`HBIT_DATA:0] r_result;
     reg [`HBIT_FLAG:0] r_fl;
@@ -65,11 +69,13 @@ module stg3ex(
     assign ow_sr_read_addr2 = iw_tgt_sr;
 
     always @* begin
+        or_branch_taken = 1'b0;
         r_fl         = {`SIZE_FLAG{1'b0}};
         r_addr       = {`SIZE_ADDR{1'b0}};
         r_result     = {`SIZE_DATA{1'b0}};
         r_ir         = {r_ui, iw_imm_val};
-        r_se_imm_val = {{`SIZE_IMM{iw_imm_val[`HBIT_IMM]}}, iw_imm_val};;
+        r_se_imm_val = {{12{iw_imm_val[`HBIT_IMM]}}, iw_imm_val};
+        r_se_immsr_val = {{16{iw_immsr_val[`HBIT_IMMSR]}}, iw_immsr_val};
         if (ow_tgt_gp_we && (ow_tgt_gp == iw_src_gp))
             r_src_gp_val = ow_result;
         else if (iw_tgt_mamo_gp_we && (iw_tgt_mamo_gp == iw_src_gp))
@@ -102,6 +108,23 @@ module stg3ex(
             r_tgt_sr_val = iw_mowb_result;
         else
             r_tgt_sr_val = iw_sr_read_data2;
+        if (iw_opc == `OPC_R_JCC  || iw_opc == `OPC_RS_BCCs  ||
+            iw_opc == `OPC_I_JCCi || iw_opc == `OPC_IS_BCCis ||
+            iw_opc == `OPC_S_SRJCC) begin
+            case (iw_cc)
+                `CC_RA: or_branch_taken = 1'b1;
+                `CC_EQ: or_branch_taken =  r_fl[`FLAG_Z];
+                `CC_NE: or_branch_taken = ~r_fl[`FLAG_Z];
+                `CC_LT: or_branch_taken =  r_fl[`FLAG_N] ^   r_fl[`FLAG_V];
+                `CC_GT: or_branch_taken = ~r_fl[`FLAG_Z] & (~r_fl[`FLAG_N] ^ r_fl[`FLAG_V]);
+                `CC_GE: or_branch_taken = ~r_fl[`FLAG_N] ^   r_fl[`FLAG_V];
+                `CC_LE: or_branch_taken =  r_fl[`FLAG_Z] | ( r_fl[`FLAG_N] ^ r_fl[`FLAG_V]);
+                `CC_BT: or_branch_taken =  r_fl[`FLAG_C];
+                `CC_AT: or_branch_taken = ~r_fl[`FLAG_Z] &  ~r_fl[`FLAG_C];
+                `CC_BE: or_branch_taken =  r_fl[`FLAG_C] |   r_fl[`FLAG_Z];
+                `CC_AE: or_branch_taken = ~r_fl[`FLAG_C];
+            endcase
+        end
         case (iw_opc)
             `OPC_R_MOV: begin
                 r_result = r_src_gp_val;
@@ -157,6 +180,10 @@ module stg3ex(
                 r_fl[`FLAG_Z] = (r_src_gp_val == r_tgt_gp_val) ? 1'b1 : 1'b0;
                 r_fl[`FLAG_C] = (r_src_gp_val < r_tgt_gp_val) ? 1'b1 : 1'b0;
             end
+            `OPC_R_JCC: begin
+                if (or_branch_taken)
+                    or_branch_pc = iw_pc + r_src_gp_val;
+            end
             `OPC_R_LD: begin
                 r_addr = r_src_gp_val;
             end
@@ -199,6 +226,10 @@ module stg3ex(
                 r_fl[`FLAG_V] =
                     ((r_src_gp_val[`HBIT_DATA] ^ r_tgt_gp_val[`HBIT_DATA]) &
                     (r_src_gp_val[`HBIT_DATA] ^ s_diff[`HBIT_DATA]));
+            end
+            `OPC_RS_BCCs: begin
+                if (or_branch_taken)
+                    or_branch_pc = iw_pc + $signed(r_src_gp_val);
             end
             `OPC_I_MOVi: begin
                 r_result = r_ir;
@@ -250,6 +281,10 @@ module stg3ex(
                 r_fl[`FLAG_Z] = (r_tgt_gp_val == r_ir) ? 1'b1 : 1'b0;
                 r_fl[`FLAG_C] = (r_tgt_gp_val < r_ir) ? 1'b1 : 1'b0;
             end
+            `OPC_I_JCCi: begin
+                if (or_branch_taken)
+                    or_branch_pc = r_ir;
+            end
             `OPC_I_STi: begin
                 r_addr = r_tgt_gp_val;
                 r_result = r_ir;
@@ -293,6 +328,10 @@ module stg3ex(
                 r_fl[`FLAG_V] = ((r_tgt_gp_val[`HBIT_DATA] ^ r_se_imm_val[`HBIT_DATA]) &
                                  (r_tgt_gp_val[`HBIT_DATA] ^ s_diff[`HBIT_DATA]));
             end
+            `OPC_IS_BCCis: begin
+                if (or_branch_taken)
+                    or_branch_pc = iw_pc + $signed(r_se_imm_val);
+            end
             `OPC_IS_STis: begin
                 r_addr = r_tgt_gp_val;
                 r_result = r_se_imm_val;
@@ -302,6 +341,10 @@ module stg3ex(
             end
             `OPC_S_SRMOV: begin
                 r_result = (iw_src_sr == `INDEX_PC) ? iw_pc : r_src_sr_val;
+            end
+            `OPC_S_SRJCC: begin
+                if (or_branch_taken)
+                    or_branch_pc = r_src_sr_val + r_se_immsr_val;
             end
             default: begin
                 r_result = `SIZE_DATA'b0;

@@ -19,12 +19,14 @@ module stg2id(
     output wire [`HBIT_TGT_SR:0] ow_tgt_sr,
     output wire                  ow_tgt_sr_we,
     output wire [`HBIT_SRC_GP:0] ow_src_gp,
-    output wire [`HBIT_SRC_SR:0] ow_src_sr
+    output wire [`HBIT_SRC_SR:0] ow_src_sr,
+    input wire                   iw_flush
 );
     wire [`HBIT_OPC:0] w_opc = iw_instr[`HBIT_INSTR_OPC:`LBIT_INSTR_OPC];
     wire w_sgn_en =
         (w_opc == `OPC_RS_ADDs)  || (w_opc == `OPC_RS_SUBs)  ||
         (w_opc == `OPC_RS_SHRs)  || (w_opc == `OPC_RS_CMPs)  ||
+        (w_opc == `OPC_RS_BCCs)  ||
         (w_opc == `OPC_IS_MOVis) || (w_opc == `OPC_IS_ADDis) ||
         (w_opc == `OPC_IS_SUBis) || (w_opc == `OPC_IS_SHRis) ||
         (w_opc == `OPC_IS_CMPis) || (w_opc == `OPC_IS_BCCis) ||
@@ -41,7 +43,7 @@ module stg2id(
         (w_opc == `OPC_IS_CMPis) || (w_opc == `OPC_IS_BCCis) ||
         (w_opc == `OPC_IS_STis)  || (w_opc == `OPC_S_LUI);
     wire w_is_branch =
-        (w_opc == `OPC_R_JCC)    || (w_opc == `OPC_R_BCC)    ||
+        (w_opc == `OPC_R_JCC)    || (w_opc == `OPC_RS_BCCs)  ||
         (w_opc == `OPC_I_JCCi)   || (w_opc == `OPC_IS_BCCis) ||
         (w_opc == `OPC_S_SRJCC);
     wire w_tgt_gp_we =
@@ -67,15 +69,15 @@ module stg2id(
     wire w_tgt_sr_we = (w_opc == `OPC_S_SRMOV);
     wire w_has_tgt_sr = w_tgt_sr_we;
     wire w_has_src_gp =
-        (w_opc == `OPC_R_MOV)    || (w_opc == `OPC_R_ADD)    ||
-        (w_opc == `OPC_R_SUB)    || (w_opc == `OPC_R_AND)    ||
-        (w_opc == `OPC_R_OR)     || (w_opc == `OPC_R_XOR)    ||
-        (w_opc == `OPC_R_SHL)    || (w_opc == `OPC_R_SHR)    ||
-        (w_opc == `OPC_R_CMP)    || (w_opc == `OPC_R_JCC)    ||
-        (w_opc == `OPC_R_BCC)    || (w_opc == `OPC_R_LD)     ||
-        (w_opc == `OPC_R_ST)     ||
-        (w_opc == `OPC_RS_ADDs)  || (w_opc == `OPC_RS_SUBs)  ||
-        (w_opc == `OPC_RS_SHRs)  || (w_opc == `OPC_RS_CMPs);
+        (w_opc == `OPC_R_MOV)    || (w_opc == `OPC_R_ADD)   ||
+        (w_opc == `OPC_R_SUB)    || (w_opc == `OPC_R_AND)   ||
+        (w_opc == `OPC_R_OR)     || (w_opc == `OPC_R_XOR)   ||
+        (w_opc == `OPC_R_SHL)    || (w_opc == `OPC_R_SHR)   ||
+        (w_opc == `OPC_R_CMP)    || (w_opc == `OPC_R_JCC)   ||
+        (w_opc == `OPC_R_LD)     || (w_opc == `OPC_R_ST)    ||
+        (w_opc == `OPC_RS_ADDs)  || (w_opc == `OPC_RS_SUBs) ||
+        (w_opc == `OPC_RS_SHRs)  || (w_opc == `OPC_RS_CMPs) ||
+        (w_opc == `OPC_RS_BCCs);
     wire w_has_src_sr = (w_opc == `OPC_S_SRMOV)  || (w_opc == `OPC_S_SRJCC);
     wire [`HBIT_IMM:0]    w_imm_val   = w_imm_en ? iw_instr[`HBIT_INSTR_IMM:`LBIT_INSTR_IMM] : `SIZE_IMM'b0;
     wire [`HBIT_IMMSR:0]  w_immsr_val = (w_opc == `OPC_S_SRJCC) ? iw_instr[`HBIT_INSTR_IMMSR:`LBIT_INSTR_IMMSR] : `SIZE_IMMSR'b0;
@@ -116,8 +118,22 @@ module stg2id(
             r_tgt_sr_we_latch <= 1'b0;
             r_src_gp_latch    <= `SIZE_SRC_GP'b0;
             r_src_sr_latch    <= `SIZE_SRC_SR'b0;
-        end
-        else begin
+        end else if (iw_flush) begin
+            r_pc_latch        <= `SIZE_ADDR'b0;
+            r_instr_latch     <= `SIZE_DATA'b0;
+            r_opc_latch       <= `SIZE_OPC'b0;
+            r_sgn_en_latch    <= 1'b0;
+            r_imm_en_latch    <= 1'b0;
+            r_imm_val_latch   <= `SIZE_IMM'b0;
+            r_immsr_val_latch <= `SIZE_IMMSR'b0;
+            r_cc_latch        <= `SIZE_CC'b0;
+            r_tgt_gp_latch    <= `SIZE_TGT_GP'b0;
+            r_tgt_gp_we_latch <= 1'b0;
+            r_tgt_sr_latch    <= `SIZE_TGT_SR'b0;
+            r_tgt_sr_we_latch <= 1'b0;
+            r_src_gp_latch    <= `SIZE_SRC_GP'b0;
+            r_src_sr_latch    <= `SIZE_SRC_SR'b0;
+        end else begin
             r_pc_latch        <= iw_pc;
             r_instr_latch     <= iw_instr;
             r_opc_latch       <= w_opc;

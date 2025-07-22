@@ -90,9 +90,15 @@ module diad(
         .ow_read_data2     (w_sr_read_data2)
     );
 
+    wire                w_branch_taken;
+    wire [`HBIT_ADDR:0] w_branch_pc;
+
     always @(posedge iw_clk or posedge iw_rst) begin
         if (iw_rst) begin
             r_ia_pc <= `SIZE_ADDR'b0;
+        end
+        else if (w_branch_taken) begin
+            r_ia_pc <= w_branch_pc;
         end
         else begin
             r_ia_pc <= r_ia_pc + `SIZE_ADDR'd1;
@@ -105,7 +111,8 @@ module diad(
         .ow_mem_addr(w_imem_addr),
         .iw_pc      (r_ia_pc),
         .ow_pc      (w_iaif_pc),
-        .ow_ia_valid(w_ia_valid)
+        .ow_ia_valid(w_ia_valid),
+        .iw_flush   (w_branch_taken)
     );
 
     stg1if u_stg1if(
@@ -115,7 +122,8 @@ module diad(
         .iw_ia_valid(w_ia_valid),
         .iw_pc      (w_iaif_pc),
         .ow_pc      (w_ifid_pc),
-        .ow_instr   (w_ifid_instr)
+        .ow_instr   (w_ifid_instr),
+        .iw_flush   (w_branch_taken)
     );
 
     wire [`HBIT_OPC:0]    w_opc;
@@ -149,7 +157,8 @@ module diad(
         .ow_tgt_sr   (w_tgt_sr),
         .ow_tgt_sr_we(w_tgt_sr_we),
         .ow_src_gp   (w_src_gp),
-        .ow_src_sr   (w_src_sr)
+        .ow_src_sr   (w_src_sr),
+        .iw_flush    (w_branch_taken)
     );
 
     wire [`HBIT_OPC:0]    w_exma_opc;
@@ -217,7 +226,9 @@ module diad(
         .ow_addr          (w_exma_addr),
         .ow_result        (w_exma_result),
         .iw_mamo_result   (w_mamo_result),
-        .iw_mowb_result   (w_mowb_result)
+        .iw_mowb_result   (w_mowb_result),
+        .or_branch_taken  (w_branch_taken),
+        .or_branch_pc     (w_branch_pc)
     );
 
     wire w_mem_mp;

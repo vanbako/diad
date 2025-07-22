@@ -18,7 +18,6 @@
 `define OPC_R_SHR    8'h0A
 `define OPC_R_CMP    8'h0B
 `define OPC_R_JCC    8'h0C
-`define OPC_R_BCC    8'h0D
 `define OPC_R_LD     8'h0E
 `define OPC_R_ST     8'h0F
 
@@ -27,6 +26,7 @@
 `define OPC_RS_SUBs  8'h14
 `define OPC_RS_SHRs  8'h1A
 `define OPC_RS_CMPs  8'h1B
+`define OPC_RS_BCCs  8'h1D
 
 // IMMEDIATE
 `define OPC_I_MOVi   8'h22
@@ -72,13 +72,13 @@ function automatic [79:0] opc2str;
             `OPC_R_SHR:    opc2str = "R_SHR";
             `OPC_R_CMP:    opc2str = "R_CMP";
             `OPC_R_JCC:    opc2str = "R_JCC";
-            `OPC_R_BCC:    opc2str = "R_BCC";
             `OPC_R_LD:     opc2str = "R_LD";
             `OPC_R_ST:     opc2str = "R_ST";
             `OPC_RS_ADDs:  opc2str = "RS_ADDs";
             `OPC_RS_SUBs:  opc2str = "RS_SUBs";
             `OPC_RS_SHRs:  opc2str = "RS_SHRs";
             `OPC_RS_CMPs:  opc2str = "RS_CMPs";
+            `OPC_RS_BCCs:  opc2str = "RS_BCCs";
             `OPC_I_MOVi:   opc2str = "I_MOVi";
             `OPC_I_ADDi:   opc2str = "I_ADDi";
             `OPC_I_SUBi:   opc2str = "I_SUBi";
