@@ -7,7 +7,9 @@ Toolchain is Vivado Lab Edition 2024.2, language verilog
 Board: OrangeCrab or ULX3S
 instructions, all memories, (GP) general purpose registers, (SSP) shadow stack pointer, (LR) link register, (PC) program counter, (IR) immediate register are diad (24 bit) in size
 floating points are not needed yet. They are for future extension
-no branch prediction, no out-of-order execution, no speculative execution, no interrupts, no exceptions, no cache, no TLB, no MMU
+A simple 1-bit branch predictor provides early targets for the fetch stage.
+No out-of-order execution, no speculative execution beyond branch prediction,
+no interrupts, no exceptions, no cache, no TLB, no MMU
 no instruction set architecture yet, only microarchitecture
 Use handshake signals (like ready/valid) between stages to allow stages to indicate when they can accept new data.
 No multi-cycle instructions like mul, div and mod yet
@@ -132,6 +134,11 @@ diad
     stage4ma
     stage4mo
     stage5wb
+
+The execute stage computes branch outcomes and sends the result to a small
+hazard unit. This unit updates the 1-bit predictor, selects the correct next PC
+and issues flush signals to the fetch and decode stages when a prediction was
+wrong.
 
 Hazards
 - Read After Write Hazards

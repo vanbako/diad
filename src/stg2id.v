@@ -19,7 +19,12 @@ module stg2id(
     output wire [`HBIT_TGT_SR:0] ow_tgt_sr,
     output wire                  ow_tgt_sr_we,
     output wire [`HBIT_SRC_GP:0] ow_src_gp,
-    output wire [`HBIT_SRC_SR:0] ow_src_sr
+    output wire [`HBIT_SRC_SR:0] ow_src_sr,
+    input wire  [`HBIT_ADDR:0]   iw_pred_pc,
+    input wire                   iw_pred_taken,
+    input wire                   iw_flush,
+    output wire [`HBIT_ADDR:0]   ow_pred_pc,
+    output wire                  ow_pred_taken
 );
     wire [`HBIT_OPC:0] w_opc = iw_instr[`HBIT_INSTR_OPC:`LBIT_INSTR_OPC];
     wire w_sgn_en =
@@ -99,9 +104,11 @@ module stg2id(
     reg                  r_tgt_sr_we_latch;
     reg [`HBIT_SRC_GP:0] r_src_gp_latch;
     reg [`HBIT_SRC_SR:0] r_src_sr_latch;
+    reg [`HBIT_ADDR:0]   r_pred_pc_latch;
+    reg                  r_pred_taken_latch;
 
     always @(posedge iw_clk or posedge iw_rst) begin
-        if (iw_rst) begin
+        if (iw_rst || iw_flush) begin
             r_pc_latch        <= `SIZE_ADDR'b0;
             r_instr_latch     <= `SIZE_DATA'b0;
             r_opc_latch       <= `SIZE_OPC'b0;
@@ -116,6 +123,8 @@ module stg2id(
             r_tgt_sr_we_latch <= 1'b0;
             r_src_gp_latch    <= `SIZE_SRC_GP'b0;
             r_src_sr_latch    <= `SIZE_SRC_SR'b0;
+            r_pred_pc_latch   <= `SIZE_ADDR'b0;
+            r_pred_taken_latch<= 1'b0;
         end
         else begin
             r_pc_latch        <= iw_pc;
@@ -132,6 +141,8 @@ module stg2id(
             r_tgt_sr_we_latch <= w_tgt_sr_we;
             r_src_gp_latch    <= w_src_gp;
             r_src_sr_latch    <= w_src_sr;
+            r_pred_pc_latch   <= iw_pred_pc;
+            r_pred_taken_latch<= iw_pred_taken;
         end
     end
 
@@ -149,4 +160,6 @@ module stg2id(
     assign ow_tgt_sr_we = r_tgt_sr_we_latch;
     assign ow_src_gp    = r_src_gp_latch;
     assign ow_src_sr    = r_src_sr_latch;
+    assign ow_pred_pc   = r_pred_pc_latch;
+    assign ow_pred_taken= r_pred_taken_latch;
 endmodule

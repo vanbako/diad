@@ -2,6 +2,7 @@
 `include "src/sr.vh"
 `include "src/flags.vh"
 `include "src/opcodes.vh"
+`include "src/cc.vh"
 
 module stg3ex(
     input wire                   iw_clk,
@@ -46,7 +47,13 @@ module stg3ex(
     output wire [`HBIT_ADDR:0]   ow_addr,
     output wire [`HBIT_DATA:0]   ow_result,
     input wire  [`HBIT_DATA:0]   iw_mamo_result,
-    input wire  [`HBIT_DATA:0]   iw_mowb_result
+    input wire  [`HBIT_DATA:0]   iw_mowb_result,
+    input wire  [`HBIT_ADDR:0]   iw_pred_pc,
+    input wire                   iw_pred_taken,
+    output wire                  ow_branch_taken,
+    output wire [`HBIT_ADDR:0]   ow_branch_target,
+    output wire [`HBIT_ADDR:0]   ow_pred_pc,
+    output wire                  ow_pred_taken
 );
     reg [`HBIT_IMM:0]  r_ui;
     reg [`HBIT_DATA:0] r_ir;
@@ -58,6 +65,8 @@ module stg3ex(
     reg [`HBIT_DATA:0] r_tgt_gp_val;
     reg [`HBIT_DATA:0] r_src_sr_val;
     reg [`HBIT_DATA:0] r_tgt_sr_val;
+    reg                r_branch_taken;
+    reg [`HBIT_ADDR:0] r_branch_target;
 
     assign ow_gp_read_addr1 = iw_src_gp;
     assign ow_gp_read_addr2 = iw_tgt_gp;
@@ -70,6 +79,8 @@ module stg3ex(
         r_result     = {`SIZE_DATA{1'b0}};
         r_ir         = {r_ui, iw_imm_val};
         r_se_imm_val = {{`SIZE_IMM{iw_imm_val[`HBIT_IMM]}}, iw_imm_val};;
+        r_branch_taken  = 1'b0;
+        r_branch_target = iw_pc + `SIZE_ADDR'd1;
         if (ow_tgt_gp_we && (ow_tgt_gp == iw_src_gp))
             r_src_gp_val = ow_result;
         else if (iw_tgt_mamo_gp_we && (iw_tgt_mamo_gp == iw_src_gp))
@@ -297,6 +308,71 @@ module stg3ex(
                 r_addr = r_tgt_gp_val;
                 r_result = r_se_imm_val;
             end
+            `OPC_R_JCC: begin
+                case (iw_cc)
+                    `CC_RA: r_branch_taken = 1'b1;
+                    `CC_EQ: r_branch_taken = r_src_sr_val[`FLAG_Z];
+                    `CC_NE: r_branch_taken = ~r_src_sr_val[`FLAG_Z];
+                    `CC_LT: r_branch_taken = r_src_sr_val[`FLAG_N];
+                    `CC_GT: r_branch_taken = ~r_src_sr_val[`FLAG_N] & ~r_src_sr_val[`FLAG_Z];
+                    `CC_LE: r_branch_taken = r_src_sr_val[`FLAG_N] | r_src_sr_val[`FLAG_Z];
+                    `CC_GE: r_branch_taken = ~r_src_sr_val[`FLAG_N];
+                    default: r_branch_taken = 1'b0;
+                endcase
+                r_branch_target = r_src_gp_val;
+            end
+            `OPC_R_BCC: begin
+                case (iw_cc)
+                    `CC_RA: r_branch_taken = 1'b1;
+                    `CC_EQ: r_branch_taken = r_src_sr_val[`FLAG_Z];
+                    `CC_NE: r_branch_taken = ~r_src_sr_val[`FLAG_Z];
+                    `CC_LT: r_branch_taken = r_src_sr_val[`FLAG_N];
+                    `CC_GT: r_branch_taken = ~r_src_sr_val[`FLAG_N] & ~r_src_sr_val[`FLAG_Z];
+                    `CC_LE: r_branch_taken = r_src_sr_val[`FLAG_N] | r_src_sr_val[`FLAG_Z];
+                    `CC_GE: r_branch_taken = ~r_src_sr_val[`FLAG_N];
+                    default: r_branch_taken = 1'b0;
+                endcase
+                r_branch_target = iw_pc + r_src_gp_val;
+            end
+            `OPC_I_JCCi: begin
+                case (iw_cc)
+                    `CC_RA: r_branch_taken = 1'b1;
+                    `CC_EQ: r_branch_taken = r_src_sr_val[`FLAG_Z];
+                    `CC_NE: r_branch_taken = ~r_src_sr_val[`FLAG_Z];
+                    `CC_LT: r_branch_taken = r_src_sr_val[`FLAG_N];
+                    `CC_GT: r_branch_taken = ~r_src_sr_val[`FLAG_N] & ~r_src_sr_val[`FLAG_Z];
+                    `CC_LE: r_branch_taken = r_src_sr_val[`FLAG_N] | r_src_sr_val[`FLAG_Z];
+                    `CC_GE: r_branch_taken = ~r_src_sr_val[`FLAG_N];
+                    default: r_branch_taken = 1'b0;
+                endcase
+                r_branch_target = r_ir;
+            end
+            `OPC_IS_BCCis: begin
+                case (iw_cc)
+                    `CC_RA: r_branch_taken = 1'b1;
+                    `CC_EQ: r_branch_taken = r_src_sr_val[`FLAG_Z];
+                    `CC_NE: r_branch_taken = ~r_src_sr_val[`FLAG_Z];
+                    `CC_LT: r_branch_taken = r_src_sr_val[`FLAG_N];
+                    `CC_GT: r_branch_taken = ~r_src_sr_val[`FLAG_N] & ~r_src_sr_val[`FLAG_Z];
+                    `CC_LE: r_branch_taken = r_src_sr_val[`FLAG_N] | r_src_sr_val[`FLAG_Z];
+                    `CC_GE: r_branch_taken = ~r_src_sr_val[`FLAG_N];
+                    default: r_branch_taken = 1'b0;
+                endcase
+                r_branch_target = iw_pc + r_se_imm_val;
+            end
+            `OPC_S_SRJCC: begin
+                case (iw_cc)
+                    `CC_RA: r_branch_taken = 1'b1;
+                    `CC_EQ: r_branch_taken = r_src_sr_val[`FLAG_Z];
+                    `CC_NE: r_branch_taken = ~r_src_sr_val[`FLAG_Z];
+                    `CC_LT: r_branch_taken = r_src_sr_val[`FLAG_N];
+                    `CC_GT: r_branch_taken = ~r_src_sr_val[`FLAG_N] & ~r_src_sr_val[`FLAG_Z];
+                    `CC_LE: r_branch_taken = r_src_sr_val[`FLAG_N] | r_src_sr_val[`FLAG_Z];
+                    `CC_GE: r_branch_taken = ~r_src_sr_val[`FLAG_N];
+                    default: r_branch_taken = 1'b0;
+                endcase
+                r_branch_target = r_tgt_sr_val + iw_immsr_val;
+            end
             `OPC_S_LUI: begin
                 r_ui = iw_imm_val;
             end
@@ -319,6 +395,8 @@ module stg3ex(
     reg                  r_tgt_sr_we;
     reg [`HBIT_ADDR:0]   r_addr_latch;
     reg [`HBIT_DATA:0]   r_result_latch;
+    reg                  r_branch_taken_latch;
+    reg [`HBIT_ADDR:0]   r_branch_target_latch;
     always @(posedge iw_clk or posedge iw_rst) begin
         if (iw_rst) begin
             r_pc_latch     <= `SIZE_ADDR'b0;
@@ -329,7 +407,9 @@ module stg3ex(
             r_tgt_sr       <= `SIZE_TGT_SR'b0;
             r_tgt_sr_we    <= 1'b0;
             r_addr_latch   <= `SIZE_ADDR'b0;
-            r_result_latch <= `SIZE_DATA'b0;
+            r_result_latch        <= `SIZE_DATA'b0;
+            r_branch_taken_latch  <= 1'b0;
+            r_branch_target_latch <= `SIZE_ADDR'b0;
         end
         else begin
             r_pc_latch     <= iw_pc;
@@ -340,7 +420,9 @@ module stg3ex(
             r_tgt_sr       <= iw_tgt_sr;
             r_tgt_sr_we    <= iw_tgt_sr_we;
             r_addr_latch   <= r_addr;
-            r_result_latch <= r_result;
+            r_result_latch        <= r_result;
+            r_branch_taken_latch  <= r_branch_taken;
+            r_branch_target_latch <= r_branch_target;
         end
     end
     assign ow_pc        = r_pc_latch;
@@ -352,4 +434,8 @@ module stg3ex(
     assign ow_tgt_sr_we = r_tgt_sr_we;
     assign ow_addr      = r_addr_latch;
     assign ow_result    = r_result_latch;
+    assign ow_branch_taken  = r_branch_taken_latch;
+    assign ow_branch_target = r_branch_target_latch;
+    assign ow_pred_pc       = iw_pred_pc;
+    assign ow_pred_taken    = iw_pred_taken;
 endmodule

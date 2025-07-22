@@ -1,5 +1,6 @@
 `include "src/sizes.vh"
 `include "src/sr.vh"
+`include "src/opcodes.vh"
 
 module diad(
     input wire iw_clk,
@@ -33,7 +34,25 @@ module diad(
 
     wire                w_ia_valid;
     reg  [`HBIT_ADDR:0] r_ia_pc;
+    wire [`HBIT_ADDR:0] w_pred_pc;
+    wire                w_pred_taken;
+    wire                w_flush;
+    wire [`HBIT_ADDR:0] w_correct_pc;
+    wire                w_bp_update;
+    wire [`HBIT_ADDR:0] w_bp_update_pc;
+    wire                w_bp_update_taken;
+    wire [`HBIT_ADDR:0] w_bp_update_target;
     wire [`HBIT_ADDR:0] w_iaif_pc;
+    wire [`HBIT_ADDR:0] w_ia_pred_pc;
+    wire                w_ia_pred_taken;
+    wire [`HBIT_ADDR:0] w_if_pred_pc;
+    wire                w_if_pred_taken;
+    wire [`HBIT_ADDR:0] w_idex_pred_pc;
+    wire                w_idex_pred_taken;
+    wire [`HBIT_ADDR:0] w_ex_pred_pc;
+    wire                w_ex_pred_taken;
+    wire                w_branch_taken;
+    wire [`HBIT_ADDR:0] w_branch_target;
     wire [`HBIT_ADDR:0] w_ifid_pc;
     wire [`HBIT_ADDR:0] w_idex_pc;
     wire [`HBIT_ADDR:0] w_exma_pc;
@@ -78,7 +97,7 @@ module diad(
     wire [`HBIT_DATA:0]   w_sr_read_data1;
     wire [`HBIT_DATA:0]   w_sr_read_data2;
 
-    reggp u_regsr(
+reggp u_regsr(
         .iw_clk            (iw_clk),
         .iw_rst            (iw_rst),
         .iw_read_addr1     (w_sr_read_addr1),
@@ -90,9 +109,27 @@ module diad(
         .ow_read_data2     (w_sr_read_data2)
     );
 
+    bpredict u_bpredict(
+        .iw_clk        (iw_clk),
+        .iw_rst        (iw_rst),
+        .iw_pc         (r_ia_pc),
+        .ow_taken      (w_pred_taken),
+        .ow_target     (w_pred_pc),
+        .iw_update     (w_bp_update),
+        .iw_update_pc  (w_bp_update_pc),
+        .iw_actual_taken(w_bp_update_taken),
+        .iw_actual_target(w_bp_update_target)
+    );
+
     always @(posedge iw_clk or posedge iw_rst) begin
         if (iw_rst) begin
             r_ia_pc <= `SIZE_ADDR'b0;
+        end
+        else if (w_flush) begin
+            r_ia_pc <= w_correct_pc;
+        end
+        else if (w_pred_taken) begin
+            r_ia_pc <= w_pred_pc;
         end
         else begin
             r_ia_pc <= r_ia_pc + `SIZE_ADDR'd1;
@@ -102,10 +139,15 @@ module diad(
     stg1ia u_stg1ia(
         .iw_clk     (iw_clk),
         .iw_rst     (iw_rst),
+        .iw_flush   (w_flush),
         .ow_mem_addr(w_imem_addr),
         .iw_pc      (r_ia_pc),
         .ow_pc      (w_iaif_pc),
-        .ow_ia_valid(w_ia_valid)
+        .ow_ia_valid(w_ia_valid),
+        .iw_pred_pc (w_pred_pc),
+        .iw_pred_taken(w_pred_taken),
+        .ow_pred_pc (w_ia_pred_pc),
+        .ow_pred_taken(w_ia_pred_taken)
     );
 
     stg1if u_stg1if(
@@ -114,7 +156,12 @@ module diad(
         .iw_mem_data(w_imem_rdata),
         .iw_ia_valid(w_ia_valid),
         .iw_pc      (w_iaif_pc),
+        .iw_pred_pc (w_ia_pred_pc),
+        .iw_pred_taken(w_ia_pred_taken),
+        .iw_flush   (w_flush),
         .ow_pc      (w_ifid_pc),
+        .ow_pred_pc (w_if_pred_pc),
+        .ow_pred_taken(w_if_pred_taken),
         .ow_instr   (w_ifid_instr)
     );
 
@@ -149,7 +196,12 @@ module diad(
         .ow_tgt_sr   (w_tgt_sr),
         .ow_tgt_sr_we(w_tgt_sr_we),
         .ow_src_gp   (w_src_gp),
-        .ow_src_sr   (w_src_sr)
+        .ow_src_sr   (w_src_sr),
+        .iw_pred_pc  (w_if_pred_pc),
+        .iw_pred_taken(w_if_pred_taken),
+        .iw_flush    (w_flush),
+        .ow_pred_pc  (w_idex_pred_pc),
+        .ow_pred_taken(w_idex_pred_taken)
     );
 
     wire [`HBIT_OPC:0]    w_exma_opc;
@@ -217,7 +269,33 @@ module diad(
         .ow_addr          (w_exma_addr),
         .ow_result        (w_exma_result),
         .iw_mamo_result   (w_mamo_result),
-        .iw_mowb_result   (w_mowb_result)
+        .iw_mowb_result   (w_mowb_result),
+        .iw_pred_pc       (w_idex_pred_pc),
+        .iw_pred_taken    (w_idex_pred_taken),
+        .ow_branch_taken  (w_branch_taken),
+        .ow_branch_target (w_branch_target),
+        .ow_pred_pc       (w_ex_pred_pc),
+        .ow_pred_taken    (w_ex_pred_taken)
+    );
+
+    wire w_ex_branch =
+        (w_exma_opc == `OPC_R_JCC)    || (w_exma_opc == `OPC_R_BCC)    ||
+        (w_exma_opc == `OPC_I_JCCi)   || (w_exma_opc == `OPC_IS_BCCis) ||
+        (w_exma_opc == `OPC_S_SRJCC);
+
+    hazard u_hazard(
+        .iw_branch_valid (w_ex_branch),
+        .iw_branch_taken (w_branch_taken),
+        .iw_branch_target(w_branch_target),
+        .iw_branch_pc    (w_exma_pc),
+        .iw_pred_taken   (w_ex_pred_taken),
+        .iw_pred_pc      (w_ex_pred_pc),
+        .ow_flush        (w_flush),
+        .ow_correct_pc   (w_correct_pc),
+        .ow_update       (w_bp_update),
+        .ow_update_pc    (w_bp_update_pc),
+        .ow_update_taken (w_bp_update_taken),
+        .ow_update_target(w_bp_update_target)
     );
 
     wire w_mem_mp;
