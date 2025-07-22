@@ -70,7 +70,6 @@ module stg3ex(
 
     always @* begin
         or_branch_taken = 1'b0;
-        r_fl         = {`SIZE_FLAG{1'b0}};
         r_addr       = {`SIZE_ADDR{1'b0}};
         r_result     = {`SIZE_DATA{1'b0}};
         r_ir         = {r_ui, iw_imm_val};
