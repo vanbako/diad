@@ -3,7 +3,7 @@
 module stg1ia(
     input wire                 iw_clk,
     input wire                 iw_rst,
-    output wire [`HBIT_ADDR:0] ow_mem_addr,
+    output wire [`HBIT_ADDR:0] ow_mem_addr [0:1],
     input wire  [`HBIT_ADDR:0] iw_pc,
     output wire [`HBIT_ADDR:0] ow_pc,
     output wire                ow_ia_valid
@@ -19,7 +19,7 @@ module stg1ia(
             r_ia_valid_latch <= 1'b1;
         end
     end
-    assign ow_mem_addr = iw_pc;
-    assign ow_pc       = r_pc_latch;
-    assign ow_ia_valid = r_ia_valid_latch;
+    assign ow_mem_addr[0] = iw_pc;
+    assign ow_pc          = r_pc_latch;
+    assign ow_ia_valid    = r_ia_valid_latch;
 endmodule

@@ -5,10 +5,10 @@ module diad(
     input wire iw_clk,
     input wire iw_rst
 );
-    wire                w_imem_we;
-    wire [`HBIT_ADDR:0] w_imem_addr;
-    wire [`HBIT_DATA:0] w_imem_wdata;
-    wire [`HBIT_DATA:0] w_imem_rdata;
+    wire                w_imem_we [0:1];
+    wire [`HBIT_ADDR:0] w_imem_addr [0:1];
+    wire [`HBIT_DATA:0] w_imem_wdata [0:1];
+    wire [`HBIT_DATA:0] w_imem_rdata [0:1];
 
     mem #(.READ_MEM(1)) u_imem(
         .iw_clk  (iw_clk),
@@ -18,10 +18,10 @@ module diad(
         .or_rdata(w_imem_rdata)
     );
 
-    wire                w_dmem_we;
-    wire [`HBIT_ADDR:0] w_dmem_addr;
-    wire [`HBIT_DATA:0] w_dmem_wdata;
-    wire [`HBIT_DATA:0] w_dmem_rdata;
+    wire                w_dmem_we [0:1];
+    wire [`HBIT_ADDR:0] w_dmem_addr [0:1];
+    wire [`HBIT_DATA:0] w_dmem_wdata [0:1];
+    wire [`HBIT_DATA:0] w_dmem_rdata [0:1];
 
     mem #(.READ_MEM(0)) u_dmem(
         .iw_clk  (iw_clk),

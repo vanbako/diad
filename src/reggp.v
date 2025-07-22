@@ -11,7 +11,7 @@ module reggp(
     output wire [`HBIT_DATA:0]   ow_read_data1,
     output wire [`HBIT_DATA:0]   ow_read_data2
 );
-    reg [`HBIT_DATA:0] r_gp[`HBIT_GP:0];
+    reg [`HBIT_DATA:0] r_gp [0:`HBIT_GP];
     integer i;
     always @(posedge iw_clk or posedge iw_rst) begin
         if (iw_rst) begin

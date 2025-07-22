@@ -11,7 +11,7 @@ module regsr(
     output wire [`HBIT_DATA:0]   ow_read_data1,
     output wire [`HBIT_DATA:0]   ow_read_data2
 );
-    reg [`HBIT_DATA:0] r_sr[`HBIT_SR:0];
+    reg [`HBIT_DATA:0] r_sr [0:`HBIT_SR];
     integer i;
     always @(posedge iw_clk or posedge iw_rst) begin
         if (iw_rst) begin
