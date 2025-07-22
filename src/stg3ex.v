@@ -250,6 +250,10 @@ module stg3ex(
                 r_fl[`FLAG_Z] = (r_tgt_gp_val == r_ir) ? 1'b1 : 1'b0;
                 r_fl[`FLAG_C] = (r_tgt_gp_val < r_ir) ? 1'b1 : 1'b0;
             end
+            `OPC_I_STi: begin
+                r_addr = r_tgt_gp_val;
+                r_result = r_ir;
+            end
             `OPC_IS_MOVis: begin
                 r_result = r_se_imm_val;
                 r_fl[`FLAG_Z] = (r_result == {`SIZE_DATA{1'b0}}) ? 1'b1 : 1'b0;
@@ -288,6 +292,10 @@ module stg3ex(
                 r_fl[`FLAG_N] = (s_diff < 0) ? 1'b1 : 1'b0;
                 r_fl[`FLAG_V] = ((r_tgt_gp_val[`HBIT_DATA] ^ r_se_imm_val[`HBIT_DATA]) &
                                  (r_tgt_gp_val[`HBIT_DATA] ^ s_diff[`HBIT_DATA]));
+            end
+            `OPC_IS_STis: begin
+                r_addr = r_tgt_gp_val;
+                r_result = r_se_imm_val;
             end
             `OPC_S_LUI: begin
                 r_ui = iw_imm_val;

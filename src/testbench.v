@@ -18,7 +18,8 @@ module testbench;
         r_rst = 1'b1;
         #10;
         r_rst = 1'b0;
-        repeat (90) @(posedge r_clk);
+//        repeat (90) @(posedge r_clk);
+        repeat (30) @(posedge r_clk);
         $finish;
     end
     integer tick = 0;
@@ -121,6 +122,18 @@ module testbench;
                  u_diad.w_tgt_sr,
                  u_diad.w_src_gp,
                  u_diad.w_src_sr);
+`endif
+`ifdef DEBUGMEM
+        $display("tick %03d : rst=%b MEM 0=%h 1=%h 2=%h 3=%h 4=%h 5=%h 6=%h 7=%h",
+                 tick, r_rst,
+                 u_diad.u_dmem.r_mem[0],
+                 u_diad.u_dmem.r_mem[1],
+                 u_diad.u_dmem.r_mem[2],
+                 u_diad.u_dmem.r_mem[3],
+                 u_diad.u_dmem.r_mem[4],
+                 u_diad.u_dmem.r_mem[5],
+                 u_diad.u_dmem.r_mem[6],
+                 u_diad.u_dmem.r_mem[7]);
 `endif
         tick = tick + 1;
     end

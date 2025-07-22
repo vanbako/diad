@@ -25,14 +25,14 @@ module stg4mo(
     input wire  [`HBIT_DATA:0]   iw_result,
     output wire [`HBIT_DATA:0]   ow_result
 );
-    reg [`HBIT_DATA:0] w_result;
+    reg [`HBIT_DATA:0] r_result;
     always @(*) begin
         ow_mem_we[iw_mem_mp] = 1'b0;
         ow_mem_wdata[iw_mem_mp] = `SIZE_DATA'b0;
-        w_result = iw_result;
-        case (ow_opc)
+        r_result = iw_result;
+        case (iw_opc)
             `OPC_R_LD: begin
-                w_result = iw_mem_rdata[iw_mem_mp];
+                r_result = iw_mem_rdata[iw_mem_mp];
             end
             `OPC_R_ST, `OPC_I_STi, `OPC_IS_STis: begin
                 ow_mem_we[iw_mem_mp] = 1'b1;
@@ -67,7 +67,7 @@ module stg4mo(
             r_tgt_gp_we_latch <= iw_tgt_gp_we;
             r_tgt_sr_latch    <= iw_tgt_sr;
             r_tgt_sr_we_latch <= iw_tgt_sr_we;
-            r_result_latch    <= iw_result;
+            r_result_latch    <= r_result;
         end
     end
     assign ow_pc        = r_pc_latch;
