@@ -123,6 +123,12 @@ module testbench;
                  u_diad.w_src_gp,
                  u_diad.w_src_sr);
 `endif
+`ifdef DEBUGADDR
+        $display("tick %03d : rst=%b ADDR %h %h",
+                 tick, r_rst,
+                 u_diad.u_stg3ex.r_addr,
+                 u_diad.w_exma_addr);
+`endif
 `ifdef DEBUGMEM
         $display("tick %03d : rst=%b MEM 0=%h 1=%h 2=%h 3=%h 4=%h 5=%h 6=%h 7=%h",
                  tick, r_rst,

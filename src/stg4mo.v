@@ -27,8 +27,10 @@ module stg4mo(
 );
     reg [`HBIT_DATA:0] r_result;
     always @(*) begin
-        ow_mem_we[iw_mem_mp] = 1'b0;
-        ow_mem_wdata[iw_mem_mp] = `SIZE_DATA'b0;
+        ow_mem_we[0] = 1'b0;
+        ow_mem_we[1] = 1'b0;
+        ow_mem_wdata[0] = `SIZE_DATA'b0;
+        ow_mem_wdata[1] = `SIZE_DATA'b0;
         r_result = iw_result;
         case (iw_opc)
             `OPC_R_LD: begin

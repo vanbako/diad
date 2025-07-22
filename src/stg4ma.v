@@ -24,19 +24,6 @@ module stg4ma(
     input wire  [`HBIT_DATA:0]   iw_result,
     output wire [`HBIT_DATA:0]   ow_result
 );
-    // assign ow_mem_addr[r_mem_mp_latch] = 
-    //     ((iw_opc == `OPC_R_LD)  || (iw_opc == `OPC_R_ST) ||
-    //      (iw_opc == `OPC_I_STi) || (iw_opc == `OPC_IS_STis))
-    //     ? iw_addr : `SIZE_ADDR'b0;
-    always @(*) begin
-        if ((iw_opc == `OPC_R_LD)  || (iw_opc == `OPC_R_ST) ||
-            (iw_opc == `OPC_I_STi) || (iw_opc == `OPC_IS_STis)) begin
-            if (r_mem_mp_latch)
-                ow_mem_addr[1] = iw_addr;
-            else
-                ow_mem_addr[0] = iw_addr;
-        end
-    end
     reg [`HBIT_ADDR:0]   r_pc_latch;
     reg [`HBIT_DATA:0]   r_instr_latch;
     reg [`HBIT_OPC:0]    r_opc_latch;
@@ -46,6 +33,15 @@ module stg4ma(
     reg                  r_tgt_sr_we_latch;
     reg                  r_mem_mp_latch;
     reg [`HBIT_DATA:0]   r_result_latch;
+    always @(*) begin
+        if ((iw_opc == `OPC_R_LD)  || (iw_opc == `OPC_R_ST) ||
+            (iw_opc == `OPC_I_STi) || (iw_opc == `OPC_IS_STis)) begin
+            if (r_mem_mp_latch)
+                ow_mem_addr[0] = iw_addr;
+            else
+                ow_mem_addr[1] = iw_addr;
+        end
+    end
     always @(posedge iw_clk or posedge iw_rst) begin
         if (iw_rst) begin
             r_pc_latch        <= `SIZE_ADDR'b0;
@@ -70,13 +66,13 @@ module stg4ma(
             r_result_latch    <= iw_result;
         end
     end
-    assign ow_pc     = r_pc_latch;
-    assign ow_instr  = r_instr_latch;
-    assign ow_opc    = r_opc_latch;
-    assign ow_tgt_gp = r_tgt_gp_latch;
+    assign ow_pc        = r_pc_latch;
+    assign ow_instr     = r_instr_latch;
+    assign ow_opc       = r_opc_latch;
+    assign ow_tgt_gp    = r_tgt_gp_latch;
     assign ow_tgt_gp_we = r_tgt_gp_we_latch;
-    assign ow_tgt_sr = r_tgt_sr_latch;
+    assign ow_tgt_sr    = r_tgt_sr_latch;
     assign ow_tgt_sr_we = r_tgt_sr_we_latch;
-    assign ow_mem_mp = r_mem_mp_latch;
-    assign ow_result = r_result_latch;
+    assign ow_mem_mp    = r_mem_mp_latch;
+    assign ow_result    = r_result_latch;
 endmodule

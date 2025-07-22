@@ -27,7 +27,8 @@ module stg2id(
         (w_opc == `OPC_RS_SHRs)  || (w_opc == `OPC_RS_CMPs)  ||
         (w_opc == `OPC_IS_MOVis) || (w_opc == `OPC_IS_ADDis) ||
         (w_opc == `OPC_IS_SUBis) || (w_opc == `OPC_IS_SHRis) ||
-        (w_opc == `OPC_IS_CMPis) || (w_opc == `OPC_IS_BCCis);
+        (w_opc == `OPC_IS_CMPis) || (w_opc == `OPC_IS_BCCis) ||
+        (w_opc == `OPC_IS_STis);
     wire w_imm_en =
         (w_opc == `OPC_I_MOVi)   || (w_opc == `OPC_I_ADDi)   ||
         (w_opc == `OPC_I_SUBi)   || (w_opc == `OPC_I_ANDi)   ||
@@ -60,7 +61,9 @@ module stg2id(
     wire w_has_tgt_gp =
         w_tgt_gp_we              ||
         (w_opc == `OPC_R_CMP)    || (w_opc == `OPC_RS_CMPs)  ||
-        (w_opc == `OPC_I_CMPi)   || (w_opc == `OPC_IS_CMPis);
+        (w_opc == `OPC_I_CMPi)   || (w_opc == `OPC_IS_CMPis) ||
+        (w_opc == `OPC_R_ST)     || (w_opc == `OPC_I_STi)    ||
+        (w_opc == `OPC_IS_STis);
     wire w_tgt_sr_we = (w_opc == `OPC_S_SRMOV);
     wire w_has_tgt_sr = w_tgt_sr_we;
     wire w_has_src_gp =
@@ -69,7 +72,8 @@ module stg2id(
         (w_opc == `OPC_R_OR)     || (w_opc == `OPC_R_XOR)    ||
         (w_opc == `OPC_R_SHL)    || (w_opc == `OPC_R_SHR)    ||
         (w_opc == `OPC_R_CMP)    || (w_opc == `OPC_R_JCC)    ||
-        (w_opc == `OPC_R_BCC)    || (w_opc == `OPC_R_ST)     ||
+        (w_opc == `OPC_R_BCC)    || (w_opc == `OPC_R_LD)     ||
+        (w_opc == `OPC_R_ST)     ||
         (w_opc == `OPC_RS_ADDs)  || (w_opc == `OPC_RS_SUBs)  ||
         (w_opc == `OPC_RS_SHRs)  || (w_opc == `OPC_RS_CMPs);
     wire w_has_src_sr = (w_opc == `OPC_S_SRMOV)  || (w_opc == `OPC_S_SRJCC);
