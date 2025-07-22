@@ -1,4 +1,5 @@
 `include "src/sizes.vh"
+`include "src/opcodes.vh"
 
 module stg4mo(
     input wire                   iw_clk,
@@ -17,12 +18,28 @@ module stg4mo(
     input wire                   iw_tgt_sr_we,
     output wire [`HBIT_TGT_SR:0] ow_tgt_sr,
     output wire                  ow_tgt_sr_we,
-    output wire                  ow_mem_we [0:1],
-    output wire [`HBIT_DATA:0]   ow_mem_wdata [0:1],
+    input wire                   iw_mem_mp,
+    output reg                   ow_mem_we [0:1],
+    output reg  [`HBIT_DATA:0]   ow_mem_wdata [0:1],
     input wire  [`HBIT_DATA:0]   iw_mem_rdata [0:1],
     input wire  [`HBIT_DATA:0]   iw_result,
     output wire [`HBIT_DATA:0]   ow_result
 );
+    reg [`HBIT_DATA:0] w_result;
+    always @(*) begin
+        ow_mem_we[iw_mem_mp] = 1'b0;
+        ow_mem_wdata[iw_mem_mp] = `SIZE_DATA'b0;
+        w_result = iw_result;
+        case (ow_opc)
+            `OPC_R_LD: begin
+                w_result = iw_mem_rdata[iw_mem_mp];
+            end
+            `OPC_R_ST, `OPC_I_STi, `OPC_IS_STis: begin
+                ow_mem_we[iw_mem_mp] = 1'b1;
+                ow_mem_wdata[iw_mem_mp] = iw_result;
+            end
+        endcase
+    end
     reg [`HBIT_ADDR:0]   r_pc_latch;
     reg [`HBIT_DATA:0]   r_instr_latch;
     reg [`HBIT_OPC:0]    r_opc_latch;

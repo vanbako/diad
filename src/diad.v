@@ -220,6 +220,8 @@ module diad(
         .iw_mowb_result   (w_mowb_result)
     );
 
+    wire w_mem_mp;
+
     stg4ma u_stg4ma(
         .iw_clk      (iw_clk),
         .iw_rst      (iw_rst),
@@ -237,6 +239,7 @@ module diad(
         .iw_tgt_sr_we(w_exma_tgt_sr_we),
         .ow_tgt_sr   (w_mamo_tgt_sr),
         .ow_tgt_sr_we(w_mamo_tgt_sr_we),
+        .ow_mem_mp   (w_mem_mp),
         .ow_mem_addr (w_dmem_addr),
         .iw_addr     (w_exma_addr),
         .iw_result   (w_exma_result),
@@ -260,6 +263,7 @@ module diad(
         .iw_tgt_sr_we(w_mamo_tgt_sr_we),
         .ow_tgt_sr   (w_mowb_tgt_sr),
         .ow_tgt_sr_we(w_mowb_tgt_sr_we),
+        .iw_mem_mp   (w_mem_mp),
         .ow_mem_we   (w_dmem_we),
         .ow_mem_wdata(w_dmem_wdata),
         .iw_mem_rdata(w_dmem_rdata),
