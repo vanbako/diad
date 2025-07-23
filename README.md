@@ -1,6 +1,7 @@
 # Diad RISC Core
 
-Diad is an experimental 24-bit RISC microarchitecture. It features a simple five-stage pipeline that now includes full instruction decode, execution and memory access. The current design adds a register file, forwarding, branch handling and basic hazard detection so a small program can run end-to-end.
+Diad is an experimental 24-bit RISC microarchitecture. It features a simple five-stage pipeline that now includes full instruction fetch, decode, execution, memory access and register writeback.
+The current design adds a register file, forwarding, branch handling and basic hazard detection so a small program can run end-to-end.
 
 The overall architecture and instruction format are documented in `design.txt`.
 
@@ -18,7 +19,7 @@ Key pipeline stages are defined in `src/diad.v`:
 2. ID    – Instruction Decode
 3. EX    – Execute
 4. MA/MO – Memory Address & Operation
-5. RA/RO – Register Address & Operation
+5. WB    – Register Write Back
 ```
 
 ## Building and simulation

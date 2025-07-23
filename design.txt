@@ -88,7 +88,7 @@ SRJCC LR+#imm (jump condition code to link register with immediate, only lower 8
 2. ID:    Instruction Decode
 3. EX:    Execute
 4. MA/MO: Memory Address & Operation
-5. RA/RO: Register Address & Operation
+5. WB:    Register Write Back
 
 - General purpose registers
 0-15 Rx : general purpose
@@ -120,11 +120,8 @@ data:
 testbench
 diad
 	reggp
-	regflag
-	reglr
-	meminstr
-	memdata
-	hazardunit
+	regsr
+	mem (instruction and data)
     stage1ia
     stage1if
     stage2id
