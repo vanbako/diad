@@ -78,7 +78,7 @@ module diad(
     wire [`HBIT_DATA:0]   w_sr_read_data1;
     wire [`HBIT_DATA:0]   w_sr_read_data2;
 
-    reggp u_regsr(
+    regsr u_regsr(
         .iw_clk            (iw_clk),
         .iw_rst            (iw_rst),
         .iw_read_addr1     (w_sr_read_addr1),
@@ -105,7 +105,7 @@ module diad(
         end
     end
 
-    stg1ia u_stg1ia(
+    stg_ia u_stg_ia(
         .iw_clk     (iw_clk),
         .iw_rst     (iw_rst),
         .ow_mem_addr(w_imem_addr),
@@ -115,7 +115,7 @@ module diad(
         .iw_flush   (w_branch_taken)
     );
 
-    stg1if u_stg1if(
+    stg_if u_stg_if(
         .iw_clk     (iw_clk),
         .iw_rst     (iw_rst),
         .iw_mem_data(w_imem_rdata),
@@ -139,7 +139,7 @@ module diad(
     wire [`HBIT_SRC_GP:0] w_src_gp;
     wire [`HBIT_SRC_SR:0] w_src_sr;
 
-    stg2id u_stg2id(
+    stg_id u_stg_id(
         .iw_clk      (iw_clk),
         .iw_rst      (iw_rst),
         .iw_pc       (w_ifid_pc),
@@ -183,7 +183,7 @@ module diad(
     wire                  w_mowb_tgt_sr_we;
     wire [`HBIT_DATA:0]   w_mowb_result;
 
-    stg3ex u_stg3ex(
+    stg_ex u_stg_ex(
         .iw_clk           (iw_clk),
         .iw_rst           (iw_rst),
         .iw_pc            (w_idex_pc),
@@ -233,7 +233,7 @@ module diad(
 
     wire w_mem_mp;
 
-    stg4ma u_stg4ma(
+    stg_ma u_stg_ma(
         .iw_clk      (iw_clk),
         .iw_rst      (iw_rst),
         .iw_pc       (w_exma_pc),
@@ -257,7 +257,7 @@ module diad(
         .ow_result   (w_mamo_result)
     );
 
-    stg4mo u_stg4mo(
+    stg_mo u_stg_mo(
         .iw_clk      (iw_clk),
         .iw_rst      (iw_rst),
         .iw_pc       (w_mamo_pc),
@@ -287,7 +287,7 @@ module diad(
     wire [`HBIT_TGT_SR:0] w_wb_tgt_sr;
     wire [`HBIT_DATA:0]   w_wb_result;
 
-    stg5wb u_stg5wb(
+    stg_wb u_stg_wb(
         .iw_clk            (iw_clk),
         .iw_rst            (iw_rst),
         .iw_pc             (w_mowb_pc),

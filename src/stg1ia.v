@@ -1,6 +1,6 @@
 `include "src/sizes.vh"
 
-module stg1ia(
+module stg_ia(
     input wire                 iw_clk,
     input wire                 iw_rst,
     output wire [`HBIT_ADDR:0] ow_mem_addr [0:1],

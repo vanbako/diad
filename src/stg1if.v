@@ -1,6 +1,6 @@
 `include "src/sizes.vh"
 
-module stg1if(
+module stg_if(
     input wire                 iw_clk,
     input wire                 iw_rst,
     input wire  [`HBIT_DATA:0] iw_mem_data [0:1],

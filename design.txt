@@ -1,16 +1,16 @@
 - About
 I'm creating a diad (24 bit) 5-stage RISC microarchitecture core
 The main goal is to keep the pipeline as simple as possible and to avoid stalls where possible
-Toolchain is Vivado Lab Edition 2024.2, language verilog
+Toolchain is currently iverilog
 
 - Details
 Board: OrangeCrab or ULX3S
 instructions, all memories, (GP) general purpose registers, (SSP) shadow stack pointer, (LR) link register, (PC) program counter, (IR) immediate register are diad (24 bit) in size
 floating points are not needed yet. They are for future extension
-no branch prediction, no out-of-order execution, no speculative execution, no interrupts, no exceptions, no cache, no TLB, no MMU
+no branch prediction (keep spectres away), no out-of-order nor speculative execution (no meltdown), no interrupts, no exceptions, no cache, no TLB, no MMU
 no instruction set architecture yet, only microarchitecture
 Use handshake signals (like ready/valid) between stages to allow stages to indicate when they can accept new data.
-No multi-cycle instructions like mul, div and mod yet
+No multi-cycle instructions like mul, div and mod yet (will be for coprocessor later)
 Each stage has its own local hazard or control logic that communicates with adjacent stages.
 Use the built-in synchronous Block RAM (BRAM) for both instruction and data memories, single-ported. Make sure to use a one-clock delay (fetch, mem & wb stages)
 Memory initialisation is with a bootloader at runtime

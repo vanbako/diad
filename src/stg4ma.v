@@ -1,7 +1,7 @@
 `include "src/sizes.vh"
 `include "src/opcodes.vh"
 
-module stg4ma(
+module stg_ma(
     input wire                   iw_clk,
     input wire                   iw_rst,
     input wire  [`HBIT_ADDR:0]   iw_pc,
@@ -34,8 +34,8 @@ module stg4ma(
     reg                  r_mem_mp_latch;
     reg [`HBIT_DATA:0]   r_result_latch;
     always @(*) begin
-        if ((iw_opc == `OPC_R_LD)  || (iw_opc == `OPC_R_ST) ||
-            (iw_opc == `OPC_I_STi) || (iw_opc == `OPC_IS_STis)) begin
+        if ((iw_opc == `OPC_RU_LDu)   || (iw_opc == `OPC_RU_STu)  ||
+            (iw_opc == `OPC_IU_STiu)  || (iw_opc == `OPC_IS_STis)) begin
             if (r_mem_mp_latch)
                 ow_mem_addr[0] = iw_addr;
             else

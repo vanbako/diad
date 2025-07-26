@@ -1,7 +1,7 @@
 `include "src/sizes.vh"
 `include "src/opcodes.vh"
 
-module stg2id(
+module stg_id(
     input wire                   iw_clk,
     input wire                   iw_rst,
     input wire  [`HBIT_ADDR:0]   iw_pc,
@@ -24,63 +24,67 @@ module stg2id(
 );
     wire [`HBIT_OPC:0] w_opc = iw_instr[`HBIT_INSTR_OPC:`LBIT_INSTR_OPC];
     wire w_sgn_en =
-        (w_opc == `OPC_RS_ADDs)  || (w_opc == `OPC_RS_SUBs)  ||
-        (w_opc == `OPC_RS_SHRs)  || (w_opc == `OPC_RS_CMPs)  ||
-        (w_opc == `OPC_RS_BCCs)  ||
-        (w_opc == `OPC_IS_MOVis) || (w_opc == `OPC_IS_ADDis) ||
-        (w_opc == `OPC_IS_SUBis) || (w_opc == `OPC_IS_SHRis) ||
-        (w_opc == `OPC_IS_CMPis) || (w_opc == `OPC_IS_BCCis) ||
+        (w_opc == `OPC_RS_ADDs)     || (w_opc == `OPC_RS_SUBs)    ||
+        (w_opc == `OPC_RS_SHRs)     || (w_opc == `OPC_RS_CMPs)    ||
+        (w_opc == `OPC_RS_BCCs)     ||
+        (w_opc == `OPC_IS_MOVis)    || (w_opc == `OPC_IS_ADDis)   ||
+        (w_opc == `OPC_IS_SUBis)    || (w_opc == `OPC_IS_SHRis)   ||
+        (w_opc == `OPC_IS_CMPis)    || (w_opc == `OPC_IS_BCCis)   ||
         (w_opc == `OPC_IS_STis);
     wire w_imm_en =
-        (w_opc == `OPC_I_MOVi)   || (w_opc == `OPC_I_ADDi)   ||
-        (w_opc == `OPC_I_SUBi)   || (w_opc == `OPC_I_ANDi)   ||
-        (w_opc == `OPC_I_ORi)    || (w_opc == `OPC_I_XORi)   ||
-        (w_opc == `OPC_I_SHLi)   || (w_opc == `OPC_I_SHRi)   ||
-        (w_opc == `OPC_I_CMPi)   || (w_opc == `OPC_I_JCCi)   ||
-        (w_opc == `OPC_I_STi)    ||
-        (w_opc == `OPC_IS_MOVis) || (w_opc == `OPC_IS_ADDis) ||
-        (w_opc == `OPC_IS_SUBis) || (w_opc == `OPC_IS_SHRis) ||
-        (w_opc == `OPC_IS_CMPis) || (w_opc == `OPC_IS_BCCis) ||
-        (w_opc == `OPC_IS_STis)  || (w_opc == `OPC_S_LUI);
-    wire w_is_branch =
-        (w_opc == `OPC_R_JCC)    || (w_opc == `OPC_RS_BCCs)  ||
-        (w_opc == `OPC_I_JCCi)   || (w_opc == `OPC_IS_BCCis) ||
-        (w_opc == `OPC_S_SRJCC);
-    wire w_tgt_gp_we =
-        (w_opc == `OPC_R_MOV)    || (w_opc == `OPC_R_ADD)    ||
-        (w_opc == `OPC_R_SUB)    || (w_opc == `OPC_R_NOT)    ||
-        (w_opc == `OPC_R_AND)    || (w_opc == `OPC_R_OR)     ||
-        (w_opc == `OPC_R_XOR)    || (w_opc == `OPC_R_SHL)    ||
-        (w_opc == `OPC_R_SHR)    || (w_opc == `OPC_R_LD)     ||
-        (w_opc == `OPC_RS_ADDs)  || (w_opc == `OPC_RS_SUBs)  ||
-        (w_opc == `OPC_RS_SHRs)  || (w_opc == `OPC_I_MOVi)   ||
-        (w_opc == `OPC_I_ADDi)   || (w_opc == `OPC_I_SUBi)   ||
-        (w_opc == `OPC_I_ANDi)   || (w_opc == `OPC_I_ORi)    ||
-        (w_opc == `OPC_I_XORi)   || (w_opc == `OPC_I_SHLi)   ||
-        (w_opc == `OPC_I_SHRi)   ||
-        (w_opc == `OPC_IS_MOVis) || (w_opc == `OPC_IS_ADDis) ||
-        (w_opc == `OPC_IS_SUBis) || (w_opc == `OPC_IS_SHRis);
-    wire w_has_tgt_gp =
-        w_tgt_gp_we              ||
-        (w_opc == `OPC_R_CMP)    || (w_opc == `OPC_RS_CMPs)  ||
-        (w_opc == `OPC_I_CMPi)   || (w_opc == `OPC_IS_CMPis) ||
-        (w_opc == `OPC_R_ST)     || (w_opc == `OPC_I_STi)    ||
+        (w_opc == `OPC_RU_LUI)      ||
+        (w_opc == `OPC_IU_MOViu)    || (w_opc == `OPC_IU_ADDiu)   ||
+        (w_opc == `OPC_IU_SUBiu)    || (w_opc == `OPC_IU_ANDiu)   ||
+        (w_opc == `OPC_IU_ORiu)     || (w_opc == `OPC_IU_XORiu)   ||
+        (w_opc == `OPC_IU_SHLiu)    || (w_opc == `OPC_IU_SHRiu)   ||
+        (w_opc == `OPC_IU_CMPiu)    || (w_opc == `OPC_IU_JCCiu)   ||
+        (w_opc == `OPC_IU_STiu)     ||
+        (w_opc == `OPC_IS_MOVis)    || (w_opc == `OPC_IS_ADDis)   ||
+        (w_opc == `OPC_IS_SUBis)    || (w_opc == `OPC_IS_SHRis)   ||
+        (w_opc == `OPC_IS_CMPis)    || (w_opc == `OPC_IS_BCCis)   ||
         (w_opc == `OPC_IS_STis);
-    wire w_tgt_sr_we = (w_opc == `OPC_S_SRMOV);
+    wire w_is_branch =
+        (w_opc == `OPC_RU_JCCu)     ||
+        (w_opc == `OPC_RS_BCCs)     ||
+        (w_opc == `OPC_IU_JCCiu)    ||
+        (w_opc == `OPC_IS_BCCis)    ||
+        (w_opc == `OPC_SR_SRJCCu);
+    wire w_tgt_gp_we =
+        (w_opc == `OPC_RU_MOVu)     || (w_opc == `OPC_RU_ADDu)    ||
+        (w_opc == `OPC_RU_SUBu)     || (w_opc == `OPC_RU_NOTu)    ||
+        (w_opc == `OPC_RU_ANDu)     || (w_opc == `OPC_RU_ORu)     ||
+        (w_opc == `OPC_RU_XORu)     || (w_opc == `OPC_RU_SHLu)    ||
+        (w_opc == `OPC_RU_SHRu)     || (w_opc == `OPC_RU_LDu)     ||
+        (w_opc == `OPC_RS_ADDs)     || (w_opc == `OPC_RS_SUBs)    ||
+        (w_opc == `OPC_RS_SHRs)     ||
+        (w_opc == `OPC_IU_MOViu)    || (w_opc == `OPC_IU_ADDiu)   ||
+        (w_opc == `OPC_IU_SUBiu)    || (w_opc == `OPC_IU_ANDiu)   ||
+        (w_opc == `OPC_IU_ORiu)     || (w_opc == `OPC_IU_XORiu)   ||
+        (w_opc == `OPC_IU_SHLiu)    || (w_opc == `OPC_IU_SHRiu)   ||
+        (w_opc == `OPC_IS_MOVis)    || (w_opc == `OPC_IS_ADDis)   ||
+        (w_opc == `OPC_IS_SUBis)    || (w_opc == `OPC_IS_SHRis);
+    wire w_has_tgt_gp =
+        w_tgt_gp_we                 ||
+        (w_opc == `OPC_RU_CMPu)     || (w_opc == `OPC_RU_STu)     ||
+        (w_opc == `OPC_RS_CMPs)     ||
+        (w_opc == `OPC_IU_CMPiu)    || (w_opc == `OPC_IU_STiu)    ||
+        (w_opc == `OPC_IS_CMPis)    || (w_opc == `OPC_IS_STis);
+    wire w_tgt_sr_we = (w_opc == `OPC_SR_SRMOVu);
     wire w_has_tgt_sr = w_tgt_sr_we;
     wire w_has_src_gp =
-        (w_opc == `OPC_R_MOV)    || (w_opc == `OPC_R_ADD)   ||
-        (w_opc == `OPC_R_SUB)    || (w_opc == `OPC_R_AND)   ||
-        (w_opc == `OPC_R_OR)     || (w_opc == `OPC_R_XOR)   ||
-        (w_opc == `OPC_R_SHL)    || (w_opc == `OPC_R_SHR)   ||
-        (w_opc == `OPC_R_CMP)    || (w_opc == `OPC_R_JCC)   ||
-        (w_opc == `OPC_R_LD)     || (w_opc == `OPC_R_ST)    ||
-        (w_opc == `OPC_RS_ADDs)  || (w_opc == `OPC_RS_SUBs) ||
-        (w_opc == `OPC_RS_SHRs)  || (w_opc == `OPC_RS_CMPs) ||
+        (w_opc == `OPC_RU_MOVu)     || (w_opc == `OPC_RU_ADDu)    ||
+        (w_opc == `OPC_RU_SUBu)     || (w_opc == `OPC_RU_ANDu)    ||
+        (w_opc == `OPC_RU_ORu)      || (w_opc == `OPC_RU_XORu)    ||
+        (w_opc == `OPC_RU_SHLu)     || (w_opc == `OPC_RU_SHRu)    ||
+        (w_opc == `OPC_RU_CMPu)     || (w_opc == `OPC_RU_JCCu)    ||
+        (w_opc == `OPC_RU_LDu)      || (w_opc == `OPC_RU_STu)     ||
+        (w_opc == `OPC_RS_ADDs)     || (w_opc == `OPC_RS_SUBs)    ||
+        (w_opc == `OPC_RS_SHRs)     || (w_opc == `OPC_RS_CMPs)    ||
         (w_opc == `OPC_RS_BCCs);
-    wire w_has_src_sr = (w_opc == `OPC_S_SRMOV)  || (w_opc == `OPC_S_SRJCC);
+    wire w_has_src_sr =
+        (w_opc == `OPC_SR_SRMOVu)  || (w_opc == `OPC_SR_SRJCCu);
     wire [`HBIT_IMM:0]    w_imm_val   = w_imm_en ? iw_instr[`HBIT_INSTR_IMM:`LBIT_INSTR_IMM] : `SIZE_IMM'b0;
-    wire [`HBIT_IMMSR:0]  w_immsr_val = (w_opc == `OPC_S_SRJCC) ? iw_instr[`HBIT_INSTR_IMMSR:`LBIT_INSTR_IMMSR] : `SIZE_IMMSR'b0;
+    wire [`HBIT_IMMSR:0]  w_immsr_val = (w_opc == `OPC_SR_SRJCCu) ? iw_instr[`HBIT_INSTR_IMMSR:`LBIT_INSTR_IMMSR] : `SIZE_IMMSR'b0;
     wire [`HBIT_CC:0]     w_cc        = w_is_branch ? iw_instr[`HBIT_INSTR_CC:`LBIT_INSTR_CC] : `SIZE_CC'b0;
     wire [`HBIT_TGT_GP:0] w_tgt_gp    = w_has_tgt_gp ? iw_instr[`HBIT_INSTR_TGT_GP:`LBIT_INSTR_TGT_GP] : `SIZE_TGT_GP'b0;
     wire [`HBIT_TGT_SR:0] w_tgt_sr    = w_has_tgt_sr ? iw_instr[`HBIT_INSTR_TGT_SR:`LBIT_INSTR_TGT_SR] : `SIZE_TGT_SR'b0;
