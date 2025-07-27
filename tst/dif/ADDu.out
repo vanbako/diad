@@ -1,0 +1,36 @@
+tick 004 : rst=0 GP  0=000000 1=000000 2=000000 3=000000 4=000000 5=000000 6=000000 7=000000 8=000000 9=000000 a=000000 b=000000 c=000000 d=000000 e=000000 f=000000
+tick 004 : rst=0 OPC                                   IDEX=RU_LUI     EXMA=NOP        MAMO=NOP        MOWB=NOP        WB=NOP       
+tick 004 : rst=0 FLAGS zero=no  negative=no  carry=no  overflow=no 
+tick 005 : rst=0 GP  0=000000 1=000000 2=000000 3=000000 4=000000 5=000000 6=000000 7=000000 8=000000 9=000000 a=000000 b=000000 c=000000 d=000000 e=000000 f=000000
+tick 005 : rst=0 OPC                                   IDEX=IU_MOViu   EXMA=RU_LUI     MAMO=NOP        MOWB=NOP        WB=NOP       
+tick 005 : rst=0 FLAGS zero=no  negative=no  carry=no  overflow=no 
+tick 006 : rst=0 GP  0=000000 1=000000 2=000000 3=000000 4=000000 5=000000 6=000000 7=000000 8=000000 9=000000 a=000000 b=000000 c=000000 d=000000 e=000000 f=000000
+tick 006 : rst=0 OPC                                   IDEX=RU_ADDu    EXMA=IU_MOViu   MAMO=RU_LUI     MOWB=NOP        WB=NOP       
+tick 006 : rst=0 FLAGS zero=no  negative=no  carry=no  overflow=no 
+tick 007 : rst=0 GP  0=000000 1=000000 2=000000 3=000000 4=000000 5=000000 6=000000 7=000000 8=000000 9=000000 a=000000 b=000000 c=000000 d=000000 e=000000 f=000000
+tick 007 : rst=0 OPC                                   IDEX=RU_ADDu    EXMA=RU_ADDu    MAMO=IU_MOViu   MOWB=RU_LUI     WB=NOP       
+tick 007 : rst=0 FLAGS zero=no  negative=no  carry=no  overflow=no 
+tick 008 : rst=0 GP  0=000000 1=000000 2=000000 3=000000 4=000000 5=000000 6=000000 7=000000 8=000000 9=000000 a=000000 b=000000 c=000000 d=000000 e=000000 f=000000
+tick 008 : rst=0 OPC                                   IDEX=RU_ADDu    EXMA=RU_ADDu    MAMO=RU_ADDu    MOWB=IU_MOViu   WB=RU_LUI    
+tick 008 : rst=0 FLAGS zero=no  negative=no  carry=no  overflow=no 
+tick 009 : rst=0 GP  0=380000 1=000000 2=000000 3=000000 4=000000 5=000000 6=000000 7=000000 8=000000 9=000000 a=000000 b=000000 c=000000 d=000000 e=000000 f=000000
+tick 009 : rst=0 OPC                                   IDEX=RU_ADDu    EXMA=RU_ADDu    MAMO=RU_ADDu    MOWB=RU_ADDu    WB=IU_MOViu  
+tick 009 : rst=0 FLAGS zero=no  negative=no  carry=no  overflow=no 
+tick 010 : rst=0 GP  0=380000 1=380000 2=000000 3=000000 4=000000 5=000000 6=000000 7=000000 8=000000 9=000000 a=000000 b=000000 c=000000 d=000000 e=000000 f=000000
+tick 010 : rst=0 OPC                                   IDEX=RU_ADDu    EXMA=RU_ADDu    MAMO=RU_ADDu    MOWB=RU_ADDu    WB=RU_ADDu   
+tick 010 : rst=0 FLAGS zero=no  negative=no  carry=no  overflow=no 
+tick 011 : rst=0 GP  0=380000 1=380000 2=000000 3=000000 4=000000 5=000000 6=000000 7=000000 8=000000 9=000000 a=000000 b=000000 c=000000 d=000000 e=000000 f=380000
+tick 011 : rst=0 OPC                                   IDEX=RU_ADDu    EXMA=RU_ADDu    MAMO=RU_ADDu    MOWB=RU_ADDu    WB=RU_ADDu   
+tick 011 : rst=0 FLAGS zero=no  negative=no  carry=yes overflow=no 
+tick 012 : rst=0 GP  0=700000 1=380000 2=000000 3=000000 4=000000 5=000000 6=000000 7=000000 8=000000 9=000000 a=000000 b=000000 c=000000 d=000000 e=000000 f=380000
+tick 012 : rst=0 OPC                                   IDEX=SR_HLT     EXMA=RU_ADDu    MAMO=RU_ADDu    MOWB=RU_ADDu    WB=RU_ADDu   
+tick 012 : rst=0 FLAGS zero=no  negative=no  carry=no  overflow=no 
+tick 013 : rst=0 GP  0=a80000 1=380000 2=000000 3=000000 4=000000 5=000000 6=000000 7=000000 8=000000 9=000000 a=000000 b=000000 c=000000 d=000000 e=000000 f=380000
+tick 013 : rst=0 OPC                                   IDEX=NOP        EXMA=SR_HLT     MAMO=RU_ADDu    MOWB=RU_ADDu    WB=RU_ADDu   
+tick 013 : rst=0 FLAGS zero=no  negative=no  carry=no  overflow=no 
+tick 014 : rst=0 GP  0=a80000 1=380000 2=000000 3=000000 4=000000 5=000000 6=000000 7=000000 8=000000 9=000000 a=000000 b=000000 c=000000 d=000000 e=000000 f=e00000
+tick 014 : rst=0 OPC                                   IDEX=NOP        EXMA=NOP        MAMO=SR_HLT     MOWB=RU_ADDu    WB=RU_ADDu   
+tick 014 : rst=0 FLAGS zero=no  negative=no  carry=no  overflow=no 
+tick 015 : rst=0 GP  0=a80000 1=380000 2=000000 3=000000 4=000000 5=000000 6=000000 7=000000 8=000000 9=000000 a=000000 b=000000 c=000000 d=000000 e=000000 f=180000
+tick 015 : rst=0 OPC                                   IDEX=NOP        EXMA=NOP        MAMO=NOP        MOWB=SR_HLT     WB=RU_ADDu   
+tick 015 : rst=0 FLAGS zero=no  negative=no  carry=no  overflow=no 
