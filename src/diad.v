@@ -183,6 +183,48 @@ module diad(
     wire                  w_mowb_tgt_sr_we;
     wire [`HBIT_DATA:0]   w_mowb_result;
 
+    wire [`HBIT_DATA:0]   w_src_gp_val;
+    wire [`HBIT_DATA:0]   w_tgt_gp_val;
+    wire [`HBIT_DATA:0]   w_src_sr_val;
+    wire [`HBIT_DATA:0]   w_tgt_sr_val;
+
+    assign w_gp_read_addr1 = w_src_gp;
+    assign w_gp_read_addr2 = w_tgt_gp;
+    assign w_sr_read_addr1 = w_src_sr;
+    assign w_sr_read_addr2 = w_tgt_sr;
+
+    forward u_forward(
+        .iw_tgt_gp        (w_tgt_gp),
+        .iw_tgt_gp_we     (w_tgt_gp_we),
+        .iw_tgt_exma_gp   (w_exma_tgt_gp),
+        .iw_tgt_exma_gp_we(w_exma_tgt_gp_we),
+        .iw_tgt_mamo_gp   (w_mamo_tgt_gp),
+        .iw_tgt_mamo_gp_we(w_mamo_tgt_gp_we),
+        .iw_tgt_mowb_gp   (w_mowb_tgt_gp),
+        .iw_tgt_mowb_gp_we(w_mowb_tgt_gp_we),
+        .iw_tgt_sr        (w_tgt_sr),
+        .iw_tgt_sr_we     (w_tgt_sr_we),
+        .iw_tgt_exma_sr   (w_exma_tgt_sr),
+        .iw_tgt_exma_sr_we(w_exma_tgt_sr_we),
+        .iw_tgt_mamo_sr   (w_mamo_tgt_sr),
+        .iw_tgt_mamo_sr_we(w_mamo_tgt_sr_we),
+        .iw_tgt_mowb_sr   (w_mowb_tgt_sr),
+        .iw_tgt_mowb_sr_we(w_mowb_tgt_sr_we),
+        .iw_src_gp        (w_src_gp),
+        .iw_src_sr        (w_src_sr),
+        .iw_gp_read_data1 (w_gp_read_data1),
+        .iw_gp_read_data2 (w_gp_read_data2),
+        .iw_sr_read_data1 (w_sr_read_data1),
+        .iw_sr_read_data2 (w_sr_read_data2),
+        .iw_exma_result   (w_exma_result),
+        .iw_mamo_result   (w_mamo_result),
+        .iw_mowb_result   (w_mowb_result),
+        .or_src_gp_val    (w_src_gp_val),
+        .or_tgt_gp_val    (w_tgt_gp_val),
+        .or_src_sr_val    (w_src_sr_val),
+        .or_tgt_sr_val    (w_tgt_sr_val)
+    );
+
     stg_ex u_stg_ex(
         .iw_clk           (iw_clk),
         .iw_rst           (iw_rst),
@@ -201,34 +243,20 @@ module diad(
         .iw_tgt_gp_we     (w_tgt_gp_we),
         .ow_tgt_gp        (w_exma_tgt_gp),
         .ow_tgt_gp_we     (w_exma_tgt_gp_we),
-        .iw_tgt_mamo_gp   (w_mamo_tgt_gp),
-        .iw_tgt_mamo_gp_we(w_mamo_tgt_gp_we),
-        .iw_tgt_mowb_gp   (w_mowb_tgt_gp),
-        .iw_tgt_mowb_gp_we(w_mowb_tgt_gp_we),
         .iw_tgt_sr        (w_tgt_sr),
         .iw_tgt_sr_we     (w_tgt_sr_we),
         .ow_tgt_sr        (w_exma_tgt_sr),
         .ow_tgt_sr_we     (w_exma_tgt_sr_we),
-        .iw_tgt_mamo_sr   (w_mamo_tgt_sr),
-        .iw_tgt_mamo_sr_we(w_mamo_tgt_sr_we),
-        .iw_tgt_mowb_sr   (w_mowb_tgt_sr),
-        .iw_tgt_mowb_sr_we(w_mowb_tgt_sr_we),
         .iw_src_gp        (w_src_gp),
         .iw_src_sr        (w_src_sr),
-        .ow_gp_read_addr1 (w_gp_read_addr1),
-        .ow_gp_read_addr2 (w_gp_read_addr2),
-        .iw_gp_read_data1 (w_gp_read_data1),
-        .iw_gp_read_data2 (w_gp_read_data2),
-        .ow_sr_read_addr1 (w_sr_read_addr1),
-        .ow_sr_read_addr2 (w_sr_read_addr2),
-        .iw_sr_read_data1 (w_sr_read_data1),
-        .iw_sr_read_data2 (w_sr_read_data2),
         .ow_addr          (w_exma_addr),
         .ow_result        (w_exma_result),
-        .iw_mamo_result   (w_mamo_result),
-        .iw_mowb_result   (w_mowb_result),
         .or_branch_taken  (w_branch_taken),
-        .or_branch_pc     (w_branch_pc)
+        .or_branch_pc     (w_branch_pc),
+        .iw_src_gp_val    (w_src_gp_val),
+        .iw_tgt_gp_val    (w_tgt_gp_val),
+        .iw_src_sr_val    (w_src_sr_val),
+        .iw_tgt_sr_val    (w_tgt_sr_val)
     );
 
     wire w_mem_mp;
