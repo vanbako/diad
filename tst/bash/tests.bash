@@ -2,6 +2,7 @@
 tests=(
   "MOVu 15"
   "ADDu 15"
+  "SUBu 13"
 )
 for test in "${tests[@]}"; do
   read OPCO TICKS <<< "$test"
