@@ -24,14 +24,12 @@ Key pipeline stages are defined in `src/diad.v`:
 
 ## Building and simulation
 
-The project is written for Verilog-2001. A simple way to test the design is with Icarus Verilog:
+The project is written for Verilog-2001. Testsets are being made:
 
 ```bash
-iverilog -DMEM_HEX_FILE="\"simple_loop.hex\"" -g2012 -o test.vvp src/*.v
-vvp test.vvp
+tst/bash/tests.bash
 ```
 
-The repository includes a small test program in `simple_loop.hex`.
 Simulation shows the pipeline executing this code, and debug output can be enabled by defining `DEBUGPC`, `DEBUGINSTR` or related macros when running Icarus Verilog.
 
 ## License
