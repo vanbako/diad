@@ -234,12 +234,14 @@ module diad(
     );
 
     hazard u_hazard(
+        .iw_clk           (iw_clk),
+        .iw_rst           (iw_rst),
         .iw_exma_opc      (w_exma_opc),
         .iw_exma_tgt_gp   (w_exma_tgt_gp),
         .iw_exma_tgt_gp_we(w_exma_tgt_gp_we),
         .iw_tgt_gp        (w_tgt_gp),
         .iw_src_gp        (w_src_gp),
-        .or_stall         (w_stall)
+        .ow_stall         (w_stall)
     );
 
     stg_ex u_stg_ex(
