@@ -35,7 +35,8 @@ module stg_ex(
     input wire  [`HBIT_DATA:0]   iw_src_gp_val,
     input wire  [`HBIT_DATA:0]   iw_tgt_gp_val,
     input wire  [`HBIT_DATA:0]   iw_src_sr_val,
-    input wire  [`HBIT_DATA:0]   iw_tgt_sr_val
+    input wire  [`HBIT_DATA:0]   iw_tgt_sr_val,
+    input wire                   iw_stall
 );
     reg [`HBIT_IMM:0]  r_ui;
     reg [`HBIT_DATA:0] r_ir;
@@ -317,8 +318,17 @@ module stg_ex(
             r_tgt_sr_we    <= 1'b0;
             r_addr_latch   <= `SIZE_ADDR'b0;
             r_result_latch <= `SIZE_DATA'b0;
-        end
-        else begin
+        end else if (iw_stall) begin
+            r_pc_latch     <= r_pc_latch;
+            r_instr_latch  <= r_instr_latch;
+            r_opc          <= r_opc;
+            r_tgt_gp       <= r_tgt_gp;
+            r_tgt_gp_we    <= r_tgt_gp_we;
+            r_tgt_sr       <= r_tgt_sr;
+            r_tgt_sr_we    <= r_tgt_sr_we;
+            r_addr_latch   <= r_addr_latch;
+            r_result_latch <= r_result_latch;
+        end else begin
             r_pc_latch     <= iw_pc;
             r_instr_latch  <= iw_instr;
             r_opc          <= iw_opc;

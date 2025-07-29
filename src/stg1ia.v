@@ -7,7 +7,8 @@ module stg_ia(
     input wire  [`HBIT_ADDR:0] iw_pc,
     output wire [`HBIT_ADDR:0] ow_pc,
     output wire                ow_ia_valid,
-    input wire                 iw_flush
+    input wire                 iw_flush,
+    input wire                 iw_stall
 );
     reg [`HBIT_ADDR:0] r_pc_latch;
     reg                r_ia_valid_latch;
@@ -18,6 +19,9 @@ module stg_ia(
         end else if (iw_flush) begin
             r_pc_latch       <= `SIZE_ADDR'b0;
             r_ia_valid_latch <= 1'b0;
+        end else if (iw_stall) begin
+            r_pc_latch       <= r_pc_latch;
+            r_ia_valid_latch <= r_ia_valid_latch;
         end else begin
             r_pc_latch       <= iw_pc;
             r_ia_valid_latch <= 1'b1;

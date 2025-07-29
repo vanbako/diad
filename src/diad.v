@@ -90,17 +90,18 @@ module diad(
         .ow_read_data2     (w_sr_read_data2)
     );
 
+    wire                w_stall;
     wire                w_branch_taken;
     wire [`HBIT_ADDR:0] w_branch_pc;
 
     always @(posedge iw_clk or posedge iw_rst) begin
         if (iw_rst) begin
             r_ia_pc <= `SIZE_ADDR'b0;
-        end
-        else if (w_branch_taken) begin
+        end else if (w_branch_taken) begin
             r_ia_pc <= w_branch_pc;
-        end
-        else begin
+        end else if (w_stall) begin
+            r_ia_pc <= r_ia_pc;
+        end else begin
             r_ia_pc <= r_ia_pc + `SIZE_ADDR'd1;
         end
     end
@@ -112,7 +113,8 @@ module diad(
         .iw_pc      (r_ia_pc),
         .ow_pc      (w_iaif_pc),
         .ow_ia_valid(w_ia_valid),
-        .iw_flush   (w_branch_taken)
+        .iw_flush   (w_branch_taken),
+        .iw_stall   (w_stall)
     );
 
     stg_if u_stg_if(
@@ -123,7 +125,8 @@ module diad(
         .iw_pc      (w_iaif_pc),
         .ow_pc      (w_ifid_pc),
         .ow_instr   (w_ifid_instr),
-        .iw_flush   (w_branch_taken)
+        .iw_flush   (w_branch_taken),
+        .iw_stall   (w_stall)
     );
 
     wire [`HBIT_OPC:0]    w_opc;
@@ -132,33 +135,38 @@ module diad(
     wire [`HBIT_IMM:0]    w_imm_val;
     wire [`HBIT_IMMSR:0]  w_immsr_val;
     wire [`HBIT_CC:0]     w_cc;
+    wire                  w_has_src_gp;
     wire [`HBIT_TGT_GP:0] w_tgt_gp;
     wire                  w_tgt_gp_we;
+    wire                  w_has_src_sr;
     wire [`HBIT_TGT_SR:0] w_tgt_sr;
     wire                  w_tgt_sr_we;
     wire [`HBIT_SRC_GP:0] w_src_gp;
     wire [`HBIT_SRC_SR:0] w_src_sr;
 
     stg_id u_stg_id(
-        .iw_clk      (iw_clk),
-        .iw_rst      (iw_rst),
-        .iw_pc       (w_ifid_pc),
-        .ow_pc       (w_idex_pc),
-        .iw_instr    (w_ifid_instr),
-        .ow_instr    (w_idex_instr),
-        .ow_opc      (w_opc),
-        .ow_sgn_en   (w_sgn_en),
-        .ow_imm_en   (w_imm_en),
-        .ow_imm_val  (w_imm_val),
-        .ow_immsr_val(w_immsr_val),
-        .ow_cc       (w_cc),
-        .ow_tgt_gp   (w_tgt_gp),
-        .ow_tgt_gp_we(w_tgt_gp_we),
-        .ow_tgt_sr   (w_tgt_sr),
-        .ow_tgt_sr_we(w_tgt_sr_we),
-        .ow_src_gp   (w_src_gp),
-        .ow_src_sr   (w_src_sr),
-        .iw_flush    (w_branch_taken)
+        .iw_clk       (iw_clk),
+        .iw_rst       (iw_rst),
+        .iw_pc        (w_ifid_pc),
+        .ow_pc        (w_idex_pc),
+        .iw_instr     (w_ifid_instr),
+        .ow_instr     (w_idex_instr),
+        .ow_opc       (w_opc),
+        .ow_sgn_en    (w_sgn_en),
+        .ow_imm_en    (w_imm_en),
+        .ow_imm_val   (w_imm_val),
+        .ow_immsr_val (w_immsr_val),
+        .ow_cc        (w_cc),
+        .ow_has_src_gp(w_has_src_gp),
+        .ow_tgt_gp    (w_tgt_gp),
+        .ow_tgt_gp_we (w_tgt_gp_we),
+        .ow_has_src_sr(w_has_src_sr),
+        .ow_tgt_sr    (w_tgt_sr),
+        .ow_tgt_sr_we (w_tgt_sr_we),
+        .ow_src_gp    (w_src_gp),
+        .ow_src_sr    (w_src_sr),
+        .iw_flush     (w_branch_taken),
+        .iw_stall     (w_stall)
     );
 
     wire [`HBIT_OPC:0]    w_exma_opc;
@@ -225,6 +233,15 @@ module diad(
         .or_tgt_sr_val    (w_tgt_sr_val)
     );
 
+    hazard u_hazard(
+        .iw_exma_opc      (w_exma_opc),
+        .iw_exma_tgt_gp   (w_exma_tgt_gp),
+        .iw_exma_tgt_gp_we(w_exma_tgt_gp_we),
+        .iw_tgt_gp        (w_tgt_gp),
+        .iw_src_gp        (w_src_gp),
+        .or_stall         (w_stall)
+    );
+
     stg_ex u_stg_ex(
         .iw_clk           (iw_clk),
         .iw_rst           (iw_rst),
@@ -256,7 +273,8 @@ module diad(
         .iw_src_gp_val    (w_src_gp_val),
         .iw_tgt_gp_val    (w_tgt_gp_val),
         .iw_src_sr_val    (w_src_sr_val),
-        .iw_tgt_sr_val    (w_tgt_sr_val)
+        .iw_tgt_sr_val    (w_tgt_sr_val),
+        .iw_stall         (w_stall)
     );
 
     wire w_mem_mp;
