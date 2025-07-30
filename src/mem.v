@@ -18,11 +18,17 @@ module mem #(
             $readmemh(`MEM_HEX_FILE, r_mem);
     end
     always @(posedge iw_clk) begin
-        if (iw_we[0])
+        if (iw_we[0] && (iw_addr[0] == iw_addr[1])) begin
             r_mem[iw_addr[0]] <= iw_wdata[0];
-        if (iw_we[1])
+            or_rdata[1] <= iw_wdata[0];
+        end else begin
+            or_rdata[1] <= r_mem[iw_addr[0]];
+        end
+        if (iw_we[1]  && (iw_addr[1] == iw_addr[0])) begin
             r_mem[iw_addr[1]] <= iw_wdata[1];
-        or_rdata[0] <= r_mem[iw_addr[0]];
-        or_rdata[1] <= r_mem[iw_addr[1]];
+            or_rdata[0] <= iw_wdata[1];
+        end else begin
+            or_rdata[0] <= r_mem[iw_addr[0]];
+        end
     end
 endmodule
