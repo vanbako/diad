@@ -160,6 +160,12 @@ module testbench;
             u_diad.u_dmem.r_mem[6],
             u_diad.u_dmem.r_mem[7]);
 `endif
+`ifdef DEBUGMEMIF
+        $display("tick %03d : rst=%b MEMIF 0=%h 1=%h",
+            tick, r_rst,
+            u_diad.w_dmem_rdata[0],
+            u_diad.w_dmem_rdata[1]);
+`endif
         tick = tick + 1;
     end
 endmodule
